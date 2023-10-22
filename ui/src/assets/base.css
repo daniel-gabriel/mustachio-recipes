@@ -1,0 +1,196 @@
+@charset "UTF-8";
+@import "@bulvar/bulma/css/bulma.css";
+
+:root {
+    /*
+    #FFF245 - rgb(255, 242, 69) - accent (yellow)
+    #006FB7 - rgb(0, 111, 183) - primary (blue)
+    #5AD2B6 - rgb(90, 210, 182) - background (green)
+    */
+
+    /* green */
+    --mm-green-light: rgb(140, 218, 200);
+    --mm-green: rgba(90, 210, 182, 1);
+    --mm-green-soft: rgba(0, 196, 167, 1);
+    --mm-green-mute: rgba(90, 210, 182, .5);
+    --mm-green-dark: rgba(65, 148, 129, 1);
+    --mm-green-very-dark: rgb(36, 100, 90);
+    --mm-green-super-dark: rgb(14, 40, 38);
+
+    /* white */
+    --mm-white: rgba(255, 255, 255, 1);
+    --mm-white-soft: rgba(220, 220, 220, 1);
+    --mm-white-mute: rgba(200, 200, 200, 1);
+    --mm-white-dark: rgba(175, 175, 175, 1);
+
+    /* black */
+    --mm-black: rgba(24, 24, 24, 1);
+    --mm-black-soft: rgba(34, 34, 34, 1);
+    --mm-black-mute: rgba(40, 40, 40, 1);
+    --mm-black-dark: rgba(12, 12, 12, 1);
+
+    /* gray */
+    --mm-grey: rgba(84, 84, 84, 0.65);
+    --mm-grey-soft: rgba(84, 84, 84, 0.48);
+    --mm-grey-mute: rgba(84, 84, 84, 0.30);
+    --mm-grey-dark: rgba(42, 42, 42, 0.65);
+
+    /* blue */
+    --mm-blue-light: rgb(178, 207, 250);
+    --mm-blue: rgba(0, 111, 183, 1);
+    --mm-blue-soft: rgba(0, 111, 183, .7);
+    --mm-blue-mute: rgba(0, 111, 183, .5);
+    --mm-blue-dark: rgba(0, 86, 141, 1);
+    --mm-blue-very-dark: rgb(0, 46, 72);
+
+    /* yellow */
+    --mm-yellow: rgba(255, 242, 69, 1);
+    --mm-yellow-soft: rgba(255, 242, 69, .8);
+    --mm-yellow-mute: rgba(239, 227, 65, 0.6);
+    --mm-yellow-dark: rgb(145, 137, 40);
+
+
+    /* brown */
+    --mm-brown: rgba(47, 35, 0, 1);
+
+    /* others */
+    --section-gap: 160px;
+    color-scheme: dark light;
+}
+
+/* semantic color variables for this project */
+:root {
+    --color-scheme-main: var(--mm-white);
+    --color-background: var(--mm-blue);
+    --color-background-soft: var(--mm-blue-soft);
+    --color-background-mute: var(--mm-blue-mute);
+
+    --color-panel-background: var(--mm-white);
+    --color-panel-background-secondary: var(--mm-white-soft);
+    --color-panel-background-disabled: var(--mm-white-mute);
+
+    --color-panel-background-warning: var(--mm-yellow-soft);
+    --color-panel-background-success: var(--mm-green-light);
+
+    --color-border: var(--mm-grey);
+    --color-border-hover: var(--mm-grey-soft);
+
+    --color-heading: var(--mm-green-super-dark);
+    --color-heading-em: var(--mm-green-very-dark);
+    --color-heading-soft: var(--mm-green-soft);
+
+    --color-text: var(--mm-green-very-dark);
+    --color-text-bright: var(--mm-green);
+    --color-text-inverse: var(--mm-blue);
+
+    --color-button-primary: var(--mm-blue);
+    --color-button-primary-hover: var(--mm-blue-dark);
+
+    --color-button-text-primary: var(--mm-white);
+    --color-button-text-primary-hover: var(--mm-white);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+    --color-scheme-main: var(--mm-black);
+    --color-background: var(--mm-black);
+    --color-background-soft: var(--mm-black-soft);
+    --color-background-mute: var(--mm-black-mute);
+
+    --color-panel-background: var(--mm-black);
+    --color-panel-background-secondary: var(--mm-black-soft);
+    --color-panel-background-disabled: var(--mm-black-mute);
+
+    --color-panel-background-warning: var(--mm-brown);
+    --color-panel-background-success: var(--mm-blue-very-dark);
+
+    --color-border: var(--mm-yellow);
+    --color-border-hover: var(--mm-yellow-soft);
+
+    --color-heading: var(--mm-blue-light);
+    --color-heading-em: var(--mm-blue);
+    --color-heading-soft: var(--mm-blue-soft);
+
+    --color-text: var(--mm-blue-light);
+    --color-text-bright: var(--mm-yellow-soft);
+    --color-text-inverse: var(--mm-green);
+
+    --color-button-primary: var(--mm-green);
+    --color-button-primary-hover: var(--mm-green-dark);
+
+    --color-button-text-primary: var(--mm-white);
+    --color-button-text-primary-hover: var(--mm-white);
+}
+
+/** Bulma **/
+:root {
+    --scheme-main: var(--color-scheme-main);
+    --card-background-color: var(--color-panel-background);
+    --card-header-color: var(--color-heading);
+    --card-header-background-color: var(--color-panel-background-secondary);
+    --link-hover: var(--color-heading-em);
+    --link: var(--color-heading);
+    --card-color: var(--color-text);
+    --text-strong: var(--color-heading);
+    --tabs-link-color: var(--color-heading-soft);
+    --tabs-link-active-color: var(--color-heading);
+    --tabs-link-active-border-bottom-color: var(--color-heading);
+    --tabs-boxed-link-hover-background-color: var(--color-background-mute);
+    --input-disabled-background-color: var(--color-panel-background-disabled);
+    --button-active-color: var(--color-heading-em);
+    --button-focus-color: var(--color-heading-em);
+    --button-focus-border-color: var(--color-border);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
+    font-weight: normal;
+}
+
+body {
+    min-height: 100vh;
+    color: var(--color-text);
+    background: var(--color-background-mute);
+    transition: color 0.5s, background-color 0.5s;
+    line-height: 1.6;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-size: 15px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Bulma */
+.title,
+.subtitle {
+    color: var(--color-heading);
+}
+.message.is-warning {
+    --message-background-color: var(--color-panel-background-warning);
+    --message-body-color: var(--color-text-bright);
+}
+.message.is-success {
+    --message-background-color: var(--color-panel-background-success);
+    --message-body-color: var(--color-text-bright);
+}
+
+.select select option {
+    color: var(--color-text);
+}
+
+hr {
+    margin: 0;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-auto {
+    overflow: auto;
+}

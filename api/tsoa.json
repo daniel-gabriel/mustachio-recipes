@@ -1,0 +1,18 @@
+{
+    "entryFile": "src/index.ts",
+    "noImplicitAdditionalProperties": "throw-on-extras",
+    "controllerPathGlobs": ["src/controllers/**/*.ts"],
+    "spec": {
+      "outputDirectory": "src/tsoa-generated/swagger/v1",
+      "specVersion": 3,
+      "name": "Recipe API",
+        "version": "V1",
+        "description": "This is the Recipe API"
+    },
+    "routes": {
+      "routesDir": "src/tsoa-generated",
+      "entryFile": "src/index.ts",
+      "iocModule": "src/startup/di/TsyringeTsoaIocContainer.ts"
+    }
+  }
+  

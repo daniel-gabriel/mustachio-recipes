@@ -1,0 +1,487 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"IIngredient": {
+				"properties": {
+					"item": {
+						"type": "string"
+					},
+					"quantity": {
+						"type": "number",
+						"format": "double"
+					},
+					"unit": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"item",
+					"quantity",
+					"unit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IStep": {
+				"properties": {
+					"instructions": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"instructions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IMediaUrl": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"image",
+							"video"
+						]
+					},
+					"displayName": {
+						"type": "string"
+					},
+					"url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"url"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IRecipe": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"source": {
+						"type": "string",
+						"description": "The source of the recipe, like a URL from where it was imported"
+					},
+					"description": {
+						"type": "string"
+					},
+					"additionalNotes": {
+						"type": "string",
+						"description": "Additional notes about the recipe, like \"put only half of the sugar\" or \"skip the chili pepper if children are eating\""
+					},
+					"ingredients": {
+						"items": {
+							"$ref": "#/components/schemas/IIngredient"
+						},
+						"type": "array"
+					},
+					"steps": {
+						"items": {
+							"$ref": "#/components/schemas/IStep"
+						},
+						"type": "array"
+					},
+					"mediaUrls": {
+						"items": {
+							"$ref": "#/components/schemas/IMediaUrl"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"ingredients",
+					"steps",
+					"mediaUrls"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPagedList_IRecipe_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IRecipe"
+						},
+						"type": "array"
+					},
+					"pageIndex": {
+						"type": "number",
+						"format": "double"
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"data",
+					"pageIndex",
+					"pageSize",
+					"totalItems",
+					"totalPages"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUrlParseRequest": {
+				"properties": {
+					"source": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"source"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ITextParseRequest": {
+				"properties": {
+					"type": {
+						"type": "string",
+						"enum": [
+							"html",
+							"text"
+						]
+					},
+					"source": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"source"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "Recipe API",
+		"version": "V1",
+		"description": "This is the Recipe API",
+		"license": {
+			"name": "UNLICENSED"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/recipes": {
+			"get": {
+				"operationId": "GetRecipes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IPagedList_IRecipe_"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "pageIndex",
+						"required": false,
+						"schema": {
+							"default": 0,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateRecipe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IRecipe"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IRecipe"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/recipes/{id}": {
+			"get": {
+				"operationId": "GetRecipe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/IRecipe"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateRecipe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/IRecipe"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IRecipe"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteRecipe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/recipes/parse-url": {
+			"post": {
+				"operationId": "ParseUrl",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IRecipe"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/IUrlParseRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/recipes/parse-text": {
+			"post": {
+				"operationId": "ParseText",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IRecipe"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ITextParseRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/recipes/parse-image": {
+			"post": {
+				"operationId": "ParseImage",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"image": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"image"
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
