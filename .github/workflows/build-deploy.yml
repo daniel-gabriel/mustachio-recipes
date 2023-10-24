@@ -157,7 +157,10 @@ jobs:
           echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
           apiVersion=(cat versions/api/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
-          echo Using versions: [uiVersion] -> $uiVersion [apiVersion] -> $apiVersion 
+
+      - name: Debug-print the versions
+        run: |
+          echo "Using versions: [uiVersion] -> ${{ steps.versions.outputs.uiVersion }} [apiVersion] -> ${{ steps.versions.outputs.apiVersion }}" 
 
       # make a release for the UI
       - name: Bump version and push UI tag
