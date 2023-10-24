@@ -150,6 +150,10 @@ jobs:
           name: Versions
           path: versions
 
+      - name: Debug-print the versions after
+        run: |
+          echo "Using versions: [uiVersion] -> $(cat versions/ui/uiVersion.txt) [apiVersion] -> $(cat versions/api/apiVersion.txt)" 
+
       - name: Get code version
         id: versions
         run: |
