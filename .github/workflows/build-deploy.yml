@@ -34,20 +34,20 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          if [ git diff --quiet HEAD^ HEAD -- ./ui ] || [ ${{ github.event.inputs.force-ui-build != 'true' }} ]; then
-            echo "UI - setting to false"
-            echo "ui-changed=false" >> $GITHUB_OUTPUT
-          else
+          if [[ "${{ github.event.inputs.force-ui-build }} == "true" ]] || ! git diff --quiet HEAD^ HEAD -- ./ui; then
             echo "UI - setting to true"
             echo "ui-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "UI - setting to false"
+            echo "ui-changed=false" >> $GITHUB_OUTPUT
           fi
           
-          if [ git diff --quiet HEAD^ HEAD -- ./api ] || [ ${{ github.event.inputs.force-api-build != 'true' }} ]; then
-            echo "API - setting to false"
-            echo "api-changed=false" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event.inputs.force-api-build }} == "true" ]] || ! git diff --quiet HEAD^ HEAD -- ./api; then
+            echo "API - setting to true"
+            echo "api-changed=true" >> $GITHUB_OUTPUT
           else
             echo "API - setting to false"
-            echo "api-changed=true" >> $GITHUB_OUTPUT
+            echo "api-changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Install GitVersion
