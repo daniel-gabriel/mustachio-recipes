@@ -157,6 +157,7 @@ jobs:
           echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
           apiVersion=(cat versions/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
+          echo Using versions: [uiVersion] -> $uiVersion [apiVersion] -> $apiVersion 
 
       # make a release for the UI
       - name: Bump version and push UI tag
@@ -166,16 +167,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ui-${{ steps.versions.outputs.uiVersion }}
-
-#      - name: Create GitHub Release for UI
-#        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
-#        uses: actions/create-release@v1
-#        with:
-#          tag_name: ui-${{ steps.versions.outputs.uiVersion }}
-#          release_name: Release ui-${{ steps.versions.outputs.uiVersion }}
-#          body: ${{ steps.tag-ui-version.outputs.changelog }}
-#          draft: false
-#          prerelease: false
 
       - name: Create a UI GitHub release
         if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
@@ -193,16 +184,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: api-${{ steps.versions.outputs.apiVersion }}
-
-#      - name: Create GitHub Release for API
-#        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
-#        uses: actions/create-release@v1
-#        with:
-#          tag_name: api-${{ steps.versions.outputs.apiVersion }}
-#          release_name: Release api-${{ steps.versions.outputs.uiVersion }}
-#          body: ${{ steps.tag-api-version.outputs.changelog }}
-#          draft: false
-#          prerelease: false
 
       - name: Create an API GitHub release
         if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
