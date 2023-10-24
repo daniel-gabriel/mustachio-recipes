@@ -2,7 +2,15 @@ name: Build and Push Docker Images
 
 on:
   workflow_dispatch:
-
+    inputs:
+      force-ui-build:
+        description: Forces a UI build when checked
+        required: false
+        default: false
+      force-api-build:
+        description: Forces an API build when checked
+        required: false
+        default: false
   push:
     branches:
       - '*'
@@ -14,8 +22,8 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-latest
     outputs:
-      ui-changed: ${{ steps.check-changes.outputs.ui-changed }}
-      api-changed: ${{ steps.check-changes.outputs.api-changed }}
+      ui-changed: ${{ steps.check-changes.outputs.ui-changed || github.event.inputs.force-ui-build }}
+      api-changed: ${{ steps.check-changes.outputs.api-changed || github.event.inputs.force-api-build }}
 
     steps:
       - name: Checkout code
