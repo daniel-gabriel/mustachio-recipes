@@ -157,10 +157,17 @@ jobs:
       - name: Get code version
         id: versions
         run: |
-          uiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/ui/uiVersion.txt)
-          echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
-          apiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/api/apiVersion.txt)
-          echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
+          uiVersion=$(cat versions/ui/uiVersion.txt)
+          echo "uiVersion=$uiVersion" >> $GITHUB_OUTPUT
+          echo "ui version: $uiVersion"
+          apiVersion=$(cat versions/api/apiVersion.txt)
+          echo "apiVersion=$apiVersion" >> $GITHUB_OUTPUT
+          echo "api version: $apiVersion"
+
+#          uiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/ui/uiVersion.txt)
+#          echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
+#          apiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/api/apiVersion.txt)
+#          echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
 
       - name: Debug-print the versions after
         run: |
