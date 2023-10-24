@@ -22,8 +22,8 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-latest
     outputs:
-      ui-changed: ${{ steps.check-changes.outputs.ui-changed || github.event.inputs.force-ui-build }}
-      api-changed: ${{ steps.check-changes.outputs.api-changed || github.event.inputs.force-api-build }}
+      ui-changed: ${{ steps.check-changes.outputs.ui-changed }}
+      api-changed: ${{ steps.check-changes.outputs.api-changed }}
 
     steps:
       - name: Checkout code
@@ -34,13 +34,13 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- ./ui; then
+          if [ git diff --quiet HEAD^ HEAD -- ./ui ] || [ github.event.inputs.force-ui-build ]; then
             echo "ui-changed=false" >> $GITHUB_OUTPUT
           else
             echo "ui-changed=true" >> $GITHUB_OUTPUT
           fi
           
-          if git diff --quiet HEAD^ HEAD -- ./api; then
+          if [ git diff --quiet HEAD^ HEAD -- ./api ] || [ github.event.inputs.force-api-build ]; then
             echo "api-changed=false" >> $GITHUB_OUTPUT
           else
             echo "api-changed=true" >> $GITHUB_OUTPUT
