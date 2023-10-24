@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from "vue-facing-decorator";
+    import {Component, Inject, Vue} from "vue-facing-decorator";
     import {ApiService, type IRecipe} from "@/api";
     import DisplayRecipeDetails from "@/components/DisplayRecipeDetails.vue";
     import {useAlertStore} from "@/stores/AlertStore";
@@ -25,10 +25,9 @@
         public recipe: IRecipe | null = null;
         private id: string | undefined;
 
-        private apiService = new ApiService({
-            BASE: "http://localhost:3000"
-            // TOKEN: async (): Promise<string> => ""
-        });
+        @Inject()
+        public apiService!: ApiService;
+
         private readonly alertStore = useAlertStore();
 
         async mounted() {

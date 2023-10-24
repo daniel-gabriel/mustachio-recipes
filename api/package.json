@@ -6,7 +6,7 @@
     "main": "index.js",
     "scripts": {
         "test:coverage": "jest unit --maxWorkers=4 --coverage --collectCoverageFrom=src/**/*.ts",
-        "test": "jest unit --maxWorkers=4",
+        "unit": "jest unit --maxWorkers=4",
         "e2e": "jest e2e --runInBand",
         "start": "ts-node src/index.ts",
         "build": "npm run clean && npm run generate-routes && tsc && npm run copySwaggerCss && npm run copySwaggerAssets",

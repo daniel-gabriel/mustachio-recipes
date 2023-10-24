@@ -1,0 +1,144 @@
+name: Build and Push Docker Images
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - '*'
+    tags:
+      - v*
+
+jobs:
+  build_and_push:
+    if: startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: gittools/actions/gitversion/setup@v0.9.15
+        with:
+          versionSpec: "5.x"
+
+      # Version for API
+      - name: Run GitVersion for API
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: gittools/actions/gitversion/execute@v0.9.15
+        id: gitversion-api
+        with:
+          useConfigFile: true
+          configFilePath: api/GitVersion.yml
+
+      - name: Make version.txt file for API
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo -n "${{ steps.gitversion-api.outputs.fullSemVer }}" > api/apiVersion.txt
+
+      # Version for UI
+      - name: Run GitVersion for UI
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: gittools/actions/gitversion/execute@v0.9.15
+        id: gitversion-ui
+        with:
+          useConfigFile: true
+          configFilePath: ui/GitVersion.yml
+
+      - name: Make version.txt file for UI
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
+
+      # Upload the version artefacts
+      - name: Publish the version artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Versions
+          path: |
+            ui/uiVersion.txt
+            api/apiVersion.txt
+
+      - name: Make docker image tags
+        id: tags
+        run: |
+          echo "apiTag=${{ github.repository }}/api:${{ steps.gitversion-api.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
+          echo "uiTag=${{ github.repository }}/ui:${{ steps.gitversion-ui.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
+
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v1
+#        with:
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Build API Docker image
+        run: |
+          cd api
+          docker build -t ghcr.io/${{ steps.tags.outputs.apiTag }} .
+      - name: Build UI Docker image
+        run: |
+          cd ui
+          docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} .
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push API Docker image
+        run: docker push ghcr.io/${{ steps.tags.outputs.apiTag }}
+
+      - name: Push UI Docker image
+        run: docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
+
+  deploy-prod:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+
+    steps:
+      # wait for an approval on the created github issue for up to 3 minutes
+      - uses: trstringer/manual-approval@v1
+        timeout-minutes: 3
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: daniel-gabriel
+          minimum-approvals: 1
+          issue-title: "Deploying ${{ github.ref_name }} to prod from docker image"
+          issue-body: "Comment 'approve' on the new issue titled ${{github.ref_name}} to approve release."
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: Versions
+          path: versions
+
+      - name: Get code version
+        id: versions
+        run: |
+          uiVersion=(cat versions/uiVersion.txt)
+          echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
+          apiVersion=(cat versions/apiVersion.txt)
+          echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.versions.outputs.version }}
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+      - name: Your deployment steps
+        run: |
+          # Add your deployment steps here
+          # This part runs only for the main branch

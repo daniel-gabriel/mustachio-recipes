@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from "vue-facing-decorator";
+    import {Component, Inject, Vue} from "vue-facing-decorator";
     import {ApiService} from "@/api";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import {useAlertStore} from "@/stores/AlertStore";
@@ -37,10 +37,10 @@
         };
 
         private id: string | undefined;
-        private apiService = new ApiService({
-            BASE: "http://localhost:3000"
-            // TOKEN: async (): Promise<string> => ""
-        });
+
+        @Inject()
+        public apiService!: ApiService;
+
         private readonly alertStore = useAlertStore();
 
         public loading = false;
@@ -72,6 +72,7 @@
                 });
                 this.$router.push({ name: "Recipes" }); // Redirect to recipe listing after successful update
             } catch (error: any) {
+                console.log(`got an error: ${JSON.stringify(error || {})}`);
                 if (error?.status === 400) {
                     this.apiErrors = error?.body?.extraData;
                 } else {

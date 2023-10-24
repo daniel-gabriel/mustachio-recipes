@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from "vue-facing-decorator";
+    import {Component, Inject, Vue} from "vue-facing-decorator";
     import {ApiService, type IPagedList_IRecipe_} from "@/api";
     import ImportModal from "@/components/ImportModal.vue";
     import ListPagedRecipes from "@/components/ListPagedRecipes.vue";
@@ -34,13 +34,12 @@
         public loading: boolean = false;
         public recipes: IPagedList_IRecipe_ = null!;
         public currentPage: number = 1;
-        public itemsPerPage: number = 10;
+        public itemsPerPage: number = 5;
         public totalItems: number = 0;
 
-        private apiService = new ApiService({
-            BASE: "http://localhost:3000"
-            // TOKEN: async (): Promise<string> => ""
-        });
+        @Inject()
+        public apiService!: ApiService;
+
         private readonly alertStore = useAlertStore();
 
         get totalPages(): number {

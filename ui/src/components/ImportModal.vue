@@ -8,22 +8,35 @@
             <div class="card-header"><span class="card-header-title">Import a Recipe</span></div>
 
             <div class="card-content">
-                <o-field grouped label="Source (URL or recipe text)">
+                <div class="notification is-info">
+                    <p>
+                        <o-icon icon="circle-info" />
+                        Thanks for trying our recipe import feature! Remember, this is still in
+                        development, please verify the results. Always check the original website's
+                        terms before importing.
+                    </p>
+                    <p>
+                        <em><strong>Any legal consequences from copying are solely your responsibility.
+                        Always use with respect for original creators.</strong></em>
+                    </p>
+                </div>
+
+                <o-field grouped label="Recipe text">
                     <o-input type="textarea" v-model="source" placeholder="Paste or drag-and-drop" expanded />
                     <o-button :disabled="isInProgress || !source" variant="info" icon-left="cloud-arrow-down" @click="doConvert(source)">
                         Import
                     </o-button>
                 </o-field>
 
-                <p v-if="recipe">
+                <p v-if="isInProgress">
+                    <span>Importing takes up to 2 minutes.</span>
+                    <progress class="progress is-small is-primary" max="100">15%</progress>
+                </p>
+                <p v-else-if="recipe">
                     <DisplayRecipeDetails
                         :hide-actions="true"
                         :recipe="recipe"
                     />
-                </p>
-                <p v-else-if="isInProgress">
-                    <span>Importing takes up to 2 minutes.</span>
-                    <progress class="progress is-small is-primary" max="100">15%</progress>
                 </p>
                 <div v-else-if="importError" class="notification is-warning is-light">
                     <p>
@@ -36,14 +49,14 @@
             </div>
 
             <div class="card-footer">
-                <span class="card-footer-item">
+                <div class="card-footer-item">
                     <div class="buttons">
                         <o-button :disabled="isInProgress || !recipe" icon-left="check" variant="primary" rounded @click="doSubmitUse">
                             Use
                         </o-button>
                         <o-button icon-left="ban" variant="warning" rounded @click="doCancel">Cancel</o-button>
                     </div>
-                </span>
+                </div>
             </div>
         </div>
     </o-modal>
@@ -51,16 +64,21 @@
 
 <script lang="ts">
     // TODO:
-    // - add support for fractions
-    // - add a carousel to display images in recipe view
-    // - add message to Import Modal saying that the import feature is experimental. Add a list of supported sites to import from
-    // - make opening a recipe more apparent - it's not clear that clicking on the recipe title opens it
-    // - add dependency injection to make the ApiService available where needed
+    // INFRA
     // - add sign-in
-    // - add support for importing from allrecipes.com (get a list of few other most popular recipe sites)
-    // - replace the "Home" screen with a welcome message (and maybe show some common stats like # or recipes)
-    // - update the "recipe-placeholder.png" should have transparent background with white silhouette outline, and be .svg
+    // - add CloudFormation template to deploy the whole thing to an environment in AWS
+
+    // FOR LATER:
+    // - add tests everywhere
+    // - add servings/portions, cook time, prep time, and nutrition info per serving (calories, carbs, protein, fat)
     // - "chef.png" should also be svg and have rounded corners
+
+    // x replace the "Home" screen with a welcome message (and maybe show some common stats like # or recipes)
+    // x add dependency injection to make the ApiService available where needed
+    // x add message to Import Modal saying that the import feature is experimental.
+    // x make opening a recipe more apparent - it's not clear that clicking on the recipe title opens it
+    // x add a carousel to display images in recipe view
+    // x add support for fractions
     // x clean up
     // x add more "units" to the drop-down list
     // x fix displaying validation errors from the API (getting prop names like "ingredients.$0.quantity - blah blah"
@@ -78,18 +96,15 @@
     // x disable the update form and show a loading indicator while saving the recipe
     // x disable the create form and show a loading indicator while saving the recipe
     import {Component, Emit, Prop, Vue, Watch} from "vue-facing-decorator";
-    import type {IRecipe} from "@/api";
     import DisplayRecipeDetails from "@/components/DisplayRecipeDetails.vue";
+    import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
 
     @Component({
         components: {DisplayRecipeDetails}
     })
     export default class ImportModal extends Vue {
-        @Prop({
-            type: null,
-            validator: (v) => v == null || typeof v == "object"
-        })
-        public readonly recipe!: IRecipe;
+        @Prop({type: null, validator: (v) => v == null || typeof v == "object"})
+        public readonly recipe!: IRecipeUpdateParams;
 
         @Prop({type: Boolean, default: false})
         public readonly isShown!: boolean;
@@ -118,12 +133,6 @@
             this.isInProgress = false;
         }
 
-        @Emit("convertUrl")
-        public doConvertUrl(url: string): string {
-            this.isInProgress = true;
-            return url;
-        }
-
         @Emit("convertText")
         public doConvertText(recipeText: string): string {
             this.isInProgress = true;
@@ -131,7 +140,7 @@
         }
 
         @Emit("submitUse")
-        public doSubmitUse(): IRecipe {
+        public doSubmitUse(): IRecipeUpdateParams {
             this.reset();
             return this.recipe;
         }
@@ -142,12 +151,7 @@
         }
 
         public doConvert(textOrUrl: string) {
-            if (/^(https?):\/\/[^\s/$.?#].[^\s]*$/.test(textOrUrl)) {
-                // it's a URL
-                this.doConvertUrl(textOrUrl);
-            } else {
-                this.doConvertText(textOrUrl);
-            }
+            this.doConvertText(textOrUrl);
         }
 
         private reset() {

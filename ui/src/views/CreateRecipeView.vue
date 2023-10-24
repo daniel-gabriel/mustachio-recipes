@@ -7,7 +7,6 @@
             :canCancel="[]"
             :recipe="importedRecipe"
             :importError="importError"
-            @convertUrl="doConvertUrl"
             @convertText="doConvertText"
             @submitUse="doSubmitUse"
             @cancel="doCancel"
@@ -25,14 +24,14 @@
 </template>
 
 <script lang="ts">
-    import {Component, Vue} from "vue-facing-decorator";
-    import {ApiService, type IRecipe, ITextParseRequest} from "@/api";
+    import {Component, Inject, Vue} from "vue-facing-decorator";
+    import {ApiService, type IRecipe} from "@/api";
     import EditRecipe from "@/components/EditRecipe.vue";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import ImportModal from "@/components/ImportModal.vue";
-    import type = ITextParseRequest.type;
     import {useAlertStore} from "@/stores/AlertStore";
     import {RecipeUpdateParamsToRecipeConverter} from "@/components/converters/RecipeUpdateParamsToRecipeConverter";
+    import {RecipeToRecipeUpdateParamsConverter} from "@/components/converters/RecipeToRecipeUpdateParamsConverter";
 
     @Component({
         components: {
@@ -42,7 +41,7 @@
     })
     export default class CreateRecipeView extends Vue {
         public loading = false;
-        public importedRecipe: IRecipe | null = null;
+        public importedRecipe: IRecipeUpdateParams | null = null;
         public importError: string | null = null;
         public showImportModal = false;
         public apiErrors: Record<string, unknown> = {};
@@ -54,10 +53,9 @@
             mediaUrls: []
         };
 
-        private apiService = new ApiService({
-            BASE: "http://localhost:3000"
-            // TOKEN: async (): Promise<string> => ""
-        });
+        @Inject()
+        public apiService!: ApiService;
+
         private readonly alertStore = useAlertStore();
 
         public async createRecipe(newRecipe: IRecipeUpdateParams) {
@@ -82,24 +80,13 @@
             this.showImportModal = true;
         }
 
-        public async doConvertUrl(url: string): Promise<void> {
-            try {
-                this.importedRecipe = await this.apiService.recipes.parseUrl({
-                    requestBody: { source: url }
-                });
-            } catch (error) {
-                console.log(`error: ${JSON.stringify(error)}`);
-                const errorMessage = (error as any)?.body?.extraData?.erroredProperties?.["parseUrlRequest.source"]?.description;
-                this.importError = errorMessage || "Could not parse the URL";
-                this.importedRecipe = null;
-            }
-        }
-
         public async doConvertText(text: string): Promise<void> {
             try {
-                this.importedRecipe = await this.apiService.recipes.parseText({
-                    requestBody: {source: text, type: type.TEXT}
-                })
+                this.importedRecipe = RecipeToRecipeUpdateParamsConverter.convert(
+                    await this.apiService.recipes.parseText({
+                        requestBody: {source: text}
+                    })
+                );
             } catch (error) {
                 const errorMessage = (error as any)?.body?.extraData?.erroredProperties?.["parseUrlRequest.source"]?.description;
                 this.importError = errorMessage || "Could not parse the text";
@@ -107,10 +94,10 @@
             }
         }
 
-        public doSubmitUse(recipe: IRecipe) {
+        public doSubmitUse(recipe: IRecipeUpdateParams) {
             this.showImportModal = false;
             this.importError = null;
-            this.recipe = RecipeUpdateParamsToRecipeConverter.convert(recipe);
+            this.recipe = recipe;
             this.importedRecipe = null;
         }
 

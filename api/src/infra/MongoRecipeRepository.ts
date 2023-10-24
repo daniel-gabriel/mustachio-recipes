@@ -5,6 +5,7 @@ import { IIngredient } from "./IIngredient";
 import {IStep} from "./IStep";
 import {IPagedList} from "./IPagedList";
 import {nameof} from "../utils/Helpers";
+import {IUpdateRecipe} from "./IUpdateRecipe";
 
 export class MongoRecipeRepository implements IRecipeRepository {
     public async getAll(pageIndex: number = 0, pageSize: number = 10): Promise<IPagedList<IRecipe>> {
@@ -45,7 +46,7 @@ export class MongoRecipeRepository implements IRecipeRepository {
         return this.toExternalModel(await RecipeModel.findById(id).exec());
     }
 
-    public async create(recipe: IRecipe): Promise<IRecipe> {
+    public async create(recipe: IUpdateRecipe): Promise<IRecipe> {
         const newRecipe = new RecipeModel(<IRecipeModel> {
             description: recipe.description,
             name: recipe.name,
@@ -71,9 +72,9 @@ export class MongoRecipeRepository implements IRecipeRepository {
         return this.toExternalModel(newRecipe) as IRecipe;
     }
 
-    public async update(id: string, updatedRecipe: IRecipe): Promise<IRecipe | null> {
+    public async update(id: string, updatedRecipe: IUpdateRecipe): Promise<IRecipe | null> {
         return this.toExternalModel(await RecipeModel.findByIdAndUpdate(id,
-            {...updatedRecipe, lastUpdatedOn: new Date()},
+            this.toDbModel(updatedRecipe),
             { new: true }
         ).exec());
     }
@@ -108,6 +109,31 @@ export class MongoRecipeRepository implements IRecipeRepository {
             })),
             createdOn: recipe.createdOn,
             lastUpdatedOn: recipe.lastUpdatedOn
+        }
+    }
+
+    private toDbModel(recipe: IUpdateRecipe): IRecipeModel {
+        return {
+            description: recipe.description,
+            name: recipe.name,
+            source: recipe.source,
+            additionalNotes: recipe.additionalNotes,
+            steps: recipe.steps.map(s => (<IStep> {
+                instructions: s.instructions
+            })),
+            mediaUrls: recipe.mediaUrls.map(u => ({
+                type: u.type as ("image" | "video"),
+                displayName: u.displayName,
+                url: u.url
+            })),
+            ingredients: recipe.ingredients.map(i => (<IIngredient>{
+                item: i.item,
+                quantity: i.quantity,
+                unit: i.unit
+            })),
+            // these 2 dates are set here, but they are ignored during saving since they are automatically set by mongoose
+            createdOn: new Date(),
+            lastUpdatedOn: new Date()
         }
     }
 }

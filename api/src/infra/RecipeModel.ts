@@ -10,19 +10,17 @@ export interface IRecipeModel extends IAuditDates{
     description: string;
     source?: string;
     additionalNotes?: string;
-    ingredients: [{
+    ingredients: {
         item: string;
         quantity: number;
         unit: string;
-    }];
-    steps: [{
-        instructions: string;
-    }];
-    mediaUrls: [{
+    }[];
+    steps: { instructions: string; }[];
+    mediaUrls: {
         type: "image" | "video";
         displayName?: string;
         url: string;
-    }];
+    }[];
 }
 
 export interface IRecipeDoc extends IRecipeModel, Document {}

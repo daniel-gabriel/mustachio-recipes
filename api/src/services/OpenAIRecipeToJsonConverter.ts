@@ -44,7 +44,8 @@ export class OpenAIRecipeToJsonConverter implements IRecipeToJsonConverter {
                 mediaUrls: [{type: "image" | "video", url: string}],
                 ingredients: [{item:  string, quantity: number, unit: string}]
             }
-            leaving the collections empty if data cannot be extracted, and returning only the JSON object in the response:
+            leaving the collections empty if data cannot be extracted, using singular form for units, and returning
+            only the JSON object in the response:
             ${data}`;
 
     }
@@ -67,7 +68,7 @@ export class OpenAIRecipeToJsonConverter implements IRecipeToJsonConverter {
                 const ing: IIngredient | undefined = i as IIngredient;
                 return {
                     item: ing?.item || "",
-                    unit: ing?.unit || (ing?.item ? "each" : ""),
+                    unit: ing?.unit || (ing?.item ? "whole" : ""),
                     quantity: ing?.quantity || 0
                 };
             }) || [];

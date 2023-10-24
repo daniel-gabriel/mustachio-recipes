@@ -1,5 +1,5 @@
 export interface IIngredientParams {
     item?: string;
-    quantity?: number;
+    quantity?: string;
     unit?: string;
 }

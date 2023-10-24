@@ -12,31 +12,33 @@
             </header>
 
             <div class="card-content">
-                <article class="media">
-                    <div class="media-centered">
-                        <div v-if="!recipe.mediaUrls.length">
-                            <figure class="image">
-                                <img src="../assets/recipe-placeholder.png" alt="Recipe image placeholder" />
-                            </figure>
-                        </div>
-                        <div v-for="media in recipe.mediaUrls" :key="media.url">
-                            <figure class="image">
-                                <img v-if="isImage(media)" :src="media.url" :alt="'Image of ' + recipe.name">
-                                <video v-else-if="isVideo(media)" controls>
-                                    <source :src="media.url" type="video/mp4">
-                                </video>
-                                <a v-else :href="media.url">{{ media.url }}</a>
-                            </figure>
-                        </div>
-                    </div>
-                </article>
+                <Gallery v-if="recipe.mediaUrls?.length" :items="recipe.mediaUrls"/>
+
+<!--                <article class="media">-->
+<!--                    <div class="media-centered">-->
+<!--                        <div v-if="!recipe.mediaUrls.length">-->
+<!--                            <figure class="image">-->
+<!--                                <img src="../assets/recipe-placeholder.png" alt="Recipe image placeholder" />-->
+<!--                            </figure>-->
+<!--                        </div>-->
+<!--                        <div v-for="media in recipe.mediaUrls" :key="media.url">-->
+<!--                            <figure class="image">-->
+<!--                                <img v-if="isImage(media)" :src="media.url" :alt="'Image of ' + recipe.name">-->
+<!--                                <video v-else-if="isVideo(media)" controls>-->
+<!--                                    <source :src="media.url" type="video/mp4">-->
+<!--                                </video>-->
+<!--                                <a v-else :href="media.url">{{ media.url }}</a>-->
+<!--                            </figure>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </article>-->
 
                 <p class="">{{ recipe.description }}</p>
 
                 <h4 class="subtitle">Ingredients</h4>
                 <ul>
                     <li v-for="ingredient in recipe.ingredients" :key="ingredient.item">
-                        {{ ingredient.quantity }} {{ ingredient.unit }} of {{ ingredient.item }}
+                        {{ toFraction(ingredient.quantity) }} {{ ingredient.unit }} of {{ ingredient.item }}
                     </li>
                 </ul>
 
@@ -54,9 +56,12 @@
     import type {IRecipe} from "@/api";
     import {IMediaUrl} from "@/api";
     import KeepScreenOnSwitcher from "@/components/KeepScreenOnSwitcher.vue";
+    import Gallery from "@/components/Gallery.vue";
+    import {NumberUtils} from "@/utils/NumberUtils";
+    import PlaceholderImage from "@/assets/recipe-placeholder.png";
 
     @Component({
-        components: {KeepScreenOnSwitcher}
+        components: {Gallery, KeepScreenOnSwitcher}
     })
     export default class DisplayRecipeDetails extends Vue {
         @Prop()
@@ -64,6 +69,13 @@
 
         @Prop({default: false})
         public hideActions!: boolean;
+
+        public get mediaItems() {
+            return this.recipe?.mediaUrls?.length ? this.recipe.mediaUrls : [{
+                url: PlaceholderImage,
+                displayName: "No images"
+            }];
+        }
 
         public isImage(media: IMediaUrl): boolean {
             return media?.type === IMediaUrl.type.IMAGE;
@@ -82,29 +94,35 @@
         public deleteRecipe(): string {
             return this.recipe.id;
         }
+
+        public toFraction(quantity: number) {
+            return NumberUtils.toFraction(quantity);
+        }
     }
 </script>
 
 <style scoped>
+/*
 .media .image {
     max-height: 200px;
     max-width: 200px;
-    overflow: hidden;    /* Ensures media doesn't spill out of the container */
-    display: flex;       /* Centers the child elements (img or video) */
+    overflow: hidden;    !* Ensures media doesn't spill out of the container *!
+    display: flex;       !* Centers the child elements (img or video) *!
     justify-content: center;
     align-items: center;
 }
 .media .image img, .media .image video {
-    /*max-height: 200px;*/
+    !*max-height: 200px;*!
     margin: 10px;
     min-width: 100%;
     min-height: 100%;
     max-width: unset;
     max-height: unset;
-    object-fit: contain;   /* Ensures media scales properly and maintains aspect ratio */
+    object-fit: contain;   !* Ensures media scales properly and maintains aspect ratio *!
 }
 .media-centered {
     margin-left: auto;
     margin-right: auto;
 }
+*/
 </style>

@@ -7,7 +7,7 @@ import Tesseract, {OEM, PSM} from "tesseract.js";
 import {ValidationError} from "../infra/error-handling/HttpErrors";
 import sharp from "sharp";
 import {IRecipeToJsonConverter} from "../services/IRecipeToJsonConverter";
-import { NatashasKitchenProcessor } from "../services/processors/NatashasKitchenProcessor";
+import {IUpdateRecipe} from "../infra/IUpdateRecipe";
 
 @injectable()
 @Route("recipes")
@@ -34,42 +34,18 @@ export class RecipeController extends Controller {
     }
 
     @Post()
-    public async createRecipe(@Body() recipe: IRecipe): Promise<IRecipe> {
+    public async createRecipe(@Body() recipe: IUpdateRecipe): Promise<IRecipe> {
         return this.recipeRepository.create(recipe);
     }
 
     @Put("{id}")
-    public async updateRecipe(@Path() id: string, @Body() updatedRecipe: IRecipe): Promise<IRecipe | null> {
+    public async updateRecipe(@Path() id: string, @Body() updatedRecipe: IUpdateRecipe): Promise<IRecipe | null> {
         return this.recipeRepository.update(id, updatedRecipe);
     }
 
     @Delete("{id}")
     public async deleteRecipe(@Path() id: string): Promise<boolean> {
         return this.recipeRepository.delete(id);
-    }
-
-    @Post("parse-url")
-    public async parseUrl(@Body() parseUrlRequest: IUrlParseRequest) {
-        const response = await fetch(parseUrlRequest.source);
-        const text = await response.text();
-        
-        let cleanedHtml: string = "";
-
-        const domain = new URL(parseUrlRequest.source).hostname;
-
-        if ("natashaskitchen.com" === domain) {
-            cleanedHtml = new NatashasKitchenProcessor().extractRelevantHtml(text);
-            console.log(`clean text: ${cleanedHtml}`);
-        } else {
-            throw new ValidationError(
-                "parseUrlRequest.source",
-                `Could not parse recipe because ${domain} is not supported.`,
-                "Recipe.ParseUrl.DomainNotSupported");
-        }
-
-        const convertedRecipe = await this.recipeToJsonConverter.parseRecipe("text", cleanedHtml);
-        convertedRecipe.source = parseUrlRequest.source;
-        return convertedRecipe;
     }
 
     @Post("parse-text")
@@ -106,24 +82,6 @@ export class RecipeController extends Controller {
             .rotate()
             .toBuffer();
     }
-
-    // private cleanupHtml(html: string): string {
-    //     const $ = cheerio.load(html);
-
-    //     // $("style, script, head, link").remove();
-
-    //     // Remove HTML comments
-    //     $("*").contents().each((_index, element) => {
-    //         if (["comment", "script", "style"].includes(element.type) ||
-    //             (element.type === "tag" && ["head", "link"].includes(element.tagName))) {
-    //             $(element).remove();
-    //         }
-    //     });
-
-    //     // Return the text content
-    //     const allText = $.root().text();
-    //     return allText.split(/\s+/).slice(0, 8000).join(" ");
-    // }
 }
 
 interface IImageParseRequest {
@@ -133,10 +91,5 @@ interface IImageParseRequest {
 }
 
 interface ITextParseRequest {
-    type: "html" | "text",
-    source: string
-}
-
-interface IUrlParseRequest {
     source: string
 }

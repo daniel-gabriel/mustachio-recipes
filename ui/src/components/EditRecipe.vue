@@ -1,10 +1,8 @@
 <template>
     <div>
+        <!-- General info -->
         <o-field label="Name" :message="errors.name" :variant="variant(errors.name as string)">
             <o-input :disabled="loading" v-model="recipe.name" placeholder="Enter recipe name"></o-input>
-        </o-field>
-        <o-field label="Original source (like a URL)" :message="errors.source" :variant="variant(errors.source as string)">
-            <o-input :disabled="loading" v-model="recipe.source" placeholder="Enter recipe source, like a URL"></o-input>
         </o-field>
 
         <o-field label="Description" :message="errors.description" :variant="variant(errors.description as string)">
@@ -39,6 +37,7 @@
             />
         </o-field>
 
+        <!-- Media -->
         <o-field label="Media" :message="errors.mediaUrlsCollection">
             <MediaUrlsGrid
                 :loading="loading"
@@ -49,6 +48,12 @@
             />
         </o-field>
 
+        <!-- Original source -->
+        <o-field label="Original source (like a URL)" :message="errors.source" :variant="variant(errors.source as string)">
+            <o-input :disabled="loading" v-model="recipe.source" placeholder="Enter recipe source, like a URL"></o-input>
+        </o-field>
+
+        <!-- Submit -->
         <o-button icon-left="floppy-disk" :loading="loading" variant="primary" rounded @click="submitSave">Save</o-button>
     </div>
 </template>
@@ -61,6 +66,9 @@
     import StepsGrid from "@/components/StepsGrid.vue";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import type {IMediaUrlParams} from "@/components/params/IMediaUrlParams";
+    import {nameof} from "@/utils/Helpers";
+    import {RecipeToRecipeUpdateParamsConverter} from "@/components/converters/RecipeToRecipeUpdateParamsConverter";
+    import Fraction from "fraction.js";
 
     @Component({
         components: {StepsGrid, MediaUrlsGrid, IngredientsGrid}
@@ -70,7 +78,7 @@
             type: null,
             validator: (v) => v == null || typeof v == "object"
         })
-        public readonly importedRecipe!: IRecipe;
+        public readonly importedRecipe!: IRecipeUpdateParams;
 
         @Prop({default: false})
         public readonly loading!: boolean;
@@ -98,15 +106,35 @@
             if (!this.apiErrors) {
                 return;
             }
+            const regex = (prefix: string) => new RegExp(`^${prefix}\\.(\\d+)\\..+$`);
             Object.keys(this.apiErrors).forEach(e => {
-                if (e.startsWith("ingredients")) {
-                    const index = +e.match(/^ingredients\.(\d+)\..+$/)![1];
+                if (e.startsWith(nameof<IErrors>("ingredients"))) {
+                    const index = +e.match(regex(nameof<IErrors>("ingredients")))![1];
                     if (!this.errors.ingredients) {
                         this.errors.ingredients = [];
                     }
                     this.errors.ingredients[index] = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("steps"))) {
+                    const index = +e.match( regex(nameof<IErrors>("steps")))![1];
+                    if (!this.errors.steps) {
+                        this.errors.steps = [];
+                    }
+                    this.errors.steps[index] = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("mediaUrls"))) {
+                    const index = +e.match(regex(nameof<IErrors>("mediaUrlsCollection")))![1];
+                    if (!this.errors.mediaUrls) {
+                        this.errors.mediaUrls = [];
+                    }
+                    this.errors.mediaUrls[index] = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("name"))) {
+                    this.errors.name = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("description"))) {
+                    this.errors.description = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("source"))) {
+                    this.errors.source = this.apiErrors[e].description;
+                } else if (e.startsWith(nameof<IErrors>("additionalNotes"))) {
+                    this.errors.additionalNotes = this.apiErrors[e].description;
                 }
-                // this.errors.ingredients = this.apiErrors
             });
         }
 
@@ -151,55 +179,69 @@
         }
 
         private validateRecipe(): boolean {
-            this.errors = {};
+            let hasErrors = false;
+            this.errors = {
+                ingredients: [],
+                steps: [],
+                mediaUrls: []
+            };
 
             if (!this.recipe.name) {
                 this.errors.name = "Name is required";
+                hasErrors = true;
             }
 
             if (!this.recipe.description) {
                 this.errors.description = "Description is required";
+                hasErrors = true;
             }
 
             if (!this.recipe.ingredients?.length) {
                 this.errors.ingredientsCollection = "At least 1 ingredient is required."
+                hasErrors = true;
             } else {
                 this.recipe.ingredients.forEach((ing, i) => {
                     if (!ing.item || !ing.unit || !ing.quantity) {
-                        if (!this.errors.ingredients) {
-                            this.errors.ingredients = [];
-                        }
-                        (this.errors.ingredients as string[])[i] =
+                        this.errors.ingredients![i] =
                             "The name, valid quantity, and a unit of measure are required for each ingredient.";
+                        hasErrors = true;
                     }
-                })
+                    if (!this.isNumberOrFraction(ing.quantity)) {
+                        this.errors.ingredients![i] = "The quantity must be a number - whole, decimal or fraction";
+                        hasErrors = true;
+                    }
+                });
             }
 
             if (!this.recipe.steps?.length) {
                 this.errors.stepsCollection = "At least 1 step is required."
+                hasErrors = true;
             } else {
                 this.recipe.steps.forEach((s, i) => {
                     if (!s.instructions) {
-                        if (!this.errors.steps) {
-                            this.errors.steps = [];
-                        }
-                        (this.errors.steps as string[])[i] =
-                            "Every instruction step is required to have some text.";
+                        this.errors.steps![i] = "Every instruction step is required to have some text.";
+                        hasErrors = true;
                     }
-                })
+                });
             }
 
             this.recipe.mediaUrls?.forEach((s, i) => {
                 if (!s.url) {
-                    if (!this.errors.mediaUrls) {
-                        this.errors.mediaUrls = [];
-                    }
-                    (this.errors.mediaUrls as string[])[i] =
-                        "Every image or video is required to have an image or video URL, or be an attached file.";
+                    this.errors.mediaUrls![i] = "Every image or video is required to have an image or video URL, or be an attached file.";
+                    hasErrors = true;
                 }
-            })
+            });
 
-            return Object.keys(this.errors).length === 0;
+            return !hasErrors;
+        }
+
+        private isNumberOrFraction(num?: string) {
+            try {
+                new Fraction(num || "");
+                return true;
+            } catch {
+                return false;
+            }
         }
     }
 

@@ -18,7 +18,7 @@ import Keys from "./startup/config/Keys";
 
     // Database connection
     try {
-        await mongoose.connect("mongodb://localhost:27017/recipeDB", {
+        await mongoose.connect("mongodb://mongodb:27017/recipeDB", {
             // useNewUrlParser: true,
             // useUnifiedTopology: true
         });

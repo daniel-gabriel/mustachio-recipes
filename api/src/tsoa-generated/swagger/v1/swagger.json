@@ -63,6 +63,14 @@
 			},
 			"IRecipe": {
 				"properties": {
+					"createdOn": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"lastUpdatedOn": {
+						"type": "string",
+						"format": "date-time"
+					},
 					"id": {
 						"type": "string"
 					},
@@ -100,6 +108,8 @@
 					}
 				},
 				"required": [
+					"createdOn",
+					"lastUpdatedOn",
 					"id",
 					"name",
 					"description",
@@ -145,33 +155,58 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"IUrlParseRequest": {
+			"IUpdateRecipe": {
 				"properties": {
-					"source": {
+					"name": {
 						"type": "string"
+					},
+					"source": {
+						"type": "string",
+						"description": "The source of the recipe, like a URL from where it was imported"
+					},
+					"description": {
+						"type": "string"
+					},
+					"additionalNotes": {
+						"type": "string",
+						"description": "Additional notes about the recipe, like \"put only half of the sugar\" or \"skip the chili pepper if children are eating\""
+					},
+					"ingredients": {
+						"items": {
+							"$ref": "#/components/schemas/IIngredient"
+						},
+						"type": "array"
+					},
+					"steps": {
+						"items": {
+							"$ref": "#/components/schemas/IStep"
+						},
+						"type": "array"
+					},
+					"mediaUrls": {
+						"items": {
+							"$ref": "#/components/schemas/IMediaUrl"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
-					"source"
+					"name",
+					"description",
+					"ingredients",
+					"steps",
+					"mediaUrls"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"ITextParseRequest": {
 				"properties": {
-					"type": {
-						"type": "string",
-						"enum": [
-							"html",
-							"text"
-						]
-					},
 					"source": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"type",
 					"source"
 				],
 				"type": "object",
@@ -257,7 +292,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IRecipe"
+								"$ref": "#/components/schemas/IUpdateRecipe"
 							}
 						}
 					}
@@ -337,7 +372,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IRecipe"
+								"$ref": "#/components/schemas/IUpdateRecipe"
 							}
 						}
 					}
@@ -371,38 +406,6 @@
 						}
 					}
 				]
-			}
-		},
-		"/recipes/parse-url": {
-			"post": {
-				"operationId": "ParseUrl",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/IRecipe"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Recipes"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/IUrlParseRequest"
-							}
-						}
-					}
-				}
 			}
 		},
 		"/recipes/parse-text": {

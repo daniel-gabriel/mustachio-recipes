@@ -45,6 +45,8 @@ const models: TsoaRoute.Models = {
     "IRecipe": {
         "dataType": "refObject",
         "properties": {
+            "createdOn": {"dataType":"datetime","required":true},
+            "lastUpdatedOn": {"dataType":"datetime","required":true},
             "id": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
             "source": {"dataType":"string"},
@@ -69,10 +71,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "IUrlParseRequest": {
+    "IUpdateRecipe": {
         "dataType": "refObject",
         "properties": {
-            "source": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
+            "source": {"dataType":"string"},
+            "description": {"dataType":"string","required":true},
+            "additionalNotes": {"dataType":"string"},
+            "ingredients": {"dataType":"array","array":{"dataType":"refObject","ref":"IIngredient"},"required":true},
+            "steps": {"dataType":"array","array":{"dataType":"refObject","ref":"IStep"},"required":true},
+            "mediaUrls": {"dataType":"array","array":{"dataType":"refObject","ref":"IMediaUrl"},"required":true},
         },
         "additionalProperties": false,
     },
@@ -80,7 +88,6 @@ const models: TsoaRoute.Models = {
     "ITextParseRequest": {
         "dataType": "refObject",
         "properties": {
-            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["html"]},{"dataType":"enum","enums":["text"]}],"required":true},
             "source": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -163,7 +170,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_createRecipe(request: any, response: any, next: any) {
             const args = {
-                    recipe: {"in":"body","name":"recipe","required":true,"ref":"IRecipe"},
+                    recipe: {"in":"body","name":"recipe","required":true,"ref":"IUpdateRecipe"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -194,7 +201,7 @@ export function RegisterRoutes(app: Router) {
             async function RecipeController_updateRecipe(request: any, response: any, next: any) {
             const args = {
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
-                    updatedRecipe: {"in":"body","name":"updatedRecipe","required":true,"ref":"IRecipe"},
+                    updatedRecipe: {"in":"body","name":"updatedRecipe","required":true,"ref":"IUpdateRecipe"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -242,36 +249,6 @@ export function RegisterRoutes(app: Router) {
 
 
               const promise = controller.deleteRecipe.apply(controller, validatedArgs as any);
-              promiseHandler(controller, promise, response, undefined, next);
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/recipes/parse-url',
-            ...(fetchMiddlewares<RequestHandler>(RecipeController)),
-            ...(fetchMiddlewares<RequestHandler>(RecipeController.prototype.parseUrl)),
-
-            async function RecipeController_parseUrl(request: any, response: any, next: any) {
-            const args = {
-                    parseUrlRequest: {"in":"body","name":"parseUrlRequest","required":true,"ref":"IUrlParseRequest"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-
-                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
-
-                const controller: any = await container.get<RecipeController>(RecipeController);
-                if (typeof controller['setStatus'] === 'function') {
-                controller.setStatus(undefined);
-                }
-
-
-              const promise = controller.parseUrl.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

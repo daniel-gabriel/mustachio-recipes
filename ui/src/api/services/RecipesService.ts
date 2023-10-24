@@ -5,7 +5,7 @@
 import type { IPagedList_IRecipe_ } from '../models/IPagedList_IRecipe_';
 import type { IRecipe } from '../models/IRecipe';
 import type { ITextParseRequest } from '../models/ITextParseRequest';
-import type { IUrlParseRequest } from '../models/IUrlParseRequest';
+import type { IUpdateRecipe } from '../models/IUpdateRecipe';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -42,7 +42,7 @@ pageSize?: number,
     public createRecipe({
 requestBody,
 }: {
-requestBody: IRecipe,
+requestBody: IUpdateRecipe,
 }): CancelablePromise<IRecipe> {
         return this.httpRequest.request({
             method: 'POST',
@@ -79,7 +79,7 @@ id,
 requestBody,
 }: {
 id: string,
-requestBody: IRecipe,
+requestBody: IUpdateRecipe,
 }): CancelablePromise<IRecipe | null> {
         return this.httpRequest.request({
             method: 'PUT',
@@ -107,23 +107,6 @@ id: string,
             path: {
                 'id': id,
             },
-        });
-    }
-
-    /**
-     * @returns IRecipe Ok
-     * @throws ApiError
-     */
-    public parseUrl({
-requestBody,
-}: {
-requestBody: IUrlParseRequest,
-}): CancelablePromise<IRecipe> {
-        return this.httpRequest.request({
-            method: 'POST',
-            url: '/recipes/parse-url',
-            body: requestBody,
-            mediaType: 'application/json',
         });
     }
 

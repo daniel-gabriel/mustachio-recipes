@@ -8,7 +8,7 @@
             paginated
             backend-pagination
             :total="recipes?.totalItems"
-            :per-page="pageSize"
+            :per-page="itemsPerPage"
             aria-next-label="Next page"
             aria-previous-label="Previous page"
             aria-page-label="Page"
@@ -23,14 +23,12 @@
                 label=""
                 >
 
-                <div class="card" :key="props.row.id">
+                <div class="card" :key="props.row.id" @click="goToDisplay(props.row.id)">
                     <header class="card-header is-shadowless">
-                            <a class="card-header-title" @click="goToDisplay(props.row.id)">
-                                {{props.row.name}}
-                            </a>
+                            <p class="card-header-title">{{props.row.name}}</p>
                         <o-field class="card-header-icon">
-                            <o-button icon-left="pencil" variant="secondary" @click="goToUpdate(props.row.id)"></o-button>
-                            <o-button icon-left="trash" variant="danger" @click="doDelete(props.row)"></o-button>
+                            <o-button icon-left="pencil" variant="secondary" @click.stop="goToUpdate(props.row.id)"></o-button>
+                            <o-button icon-left="trash" variant="danger" @click.stop="doDelete(props.row)"></o-button>
                         </o-field>
                     </header>
                     <div class="card-content columns">
@@ -42,17 +40,19 @@
                             <div class="media">
                                 <div class="has-text-right">
                                     <figure class="image is-128x128">
-                                        <video v-if="isMainMediaAVideo(props.row)" controls>
-                                            <source :src="getMainMediaUrl(props.row)" type="video/mp4">
-                                        </video>
-                                        <img v-else-if="isMainMediaAnImage(props.row)"
-                                             :src="getMainMediaUrl(props.row)"
-                                             alt="Meal image"
-                                        >
-                                        <img v-else
-                                             src="../assets/recipe-placeholder.png"
-                                             alt="Meal image"
-                                        >
+                                        <div v-if="props.row.mediaUrls?.length">
+                                            <video v-if="isMainMediaAVideo(props.row)" controls>
+                                                <source :src="getMainMediaUrl(props.row)" type="video/mp4">
+                                            </video>
+                                            <img v-else-if="isMainMediaAnImage(props.row)"
+                                                 :src="getMainMediaUrl(props.row)"
+                                                 alt="Meal image"
+                                            >
+                                            <img v-else
+                                                 src="../assets/recipe-placeholder.png"
+                                                 alt="Meal image"
+                                            >
+                                        </div>
                                     </figure>
                                 </div>
                             </div>
@@ -71,10 +71,6 @@
 
     @Component
     export default class ListPagedRecipes extends Vue {
-        public get pageSize() {
-            return 10;
-        }
-
         @Prop({default: false})
         public readonly loading!: boolean;
         
@@ -145,4 +141,21 @@
 </script>
 
 <style scoped>
+.card {
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+.image {
+    overflow: hidden;
+}
+.image img, .image video {
+    height: auto;
+    width: 100%;
+    max-height: 128px;
+    max-width: 128px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    object-fit: contain;
+}
 </style>

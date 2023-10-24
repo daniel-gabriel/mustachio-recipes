@@ -7,10 +7,7 @@ import type { IIngredient } from './IIngredient';
 import type { IMediaUrl } from './IMediaUrl';
 import type { IStep } from './IStep';
 
-export type IRecipe = {
-    createdOn: string;
-    lastUpdatedOn: string;
-    id: string;
+export type IUpdateRecipe = {
     name: string;
     /**
      * The source of the recipe, like a URL from where it was imported

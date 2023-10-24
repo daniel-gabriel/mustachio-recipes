@@ -4,16 +4,5 @@
 /* eslint-disable */
 
 export type ITextParseRequest = {
-    type: ITextParseRequest.type;
     source: string;
 };
-
-export namespace ITextParseRequest {
-
-    export enum type {
-        HTML = 'html',
-        TEXT = 'text',
-    }
-
-
-}
