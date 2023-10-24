@@ -13,12 +13,30 @@ jobs:
   build_and_push:
     if: startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-latest
+    outputs:
+      ui-changed: ${{ steps.check-changes.outputs.ui-changed }}
+      api-changed: ${{ steps.check-changes.outputs.api-changed }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if git diff --quiet HEAD^ HEAD -- ./ui; then
+            echo "ui-changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "ui-changed=true" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --quiet HEAD^ HEAD -- ./api; then
+            echo "api-changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "api-changed=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Install GitVersion
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -28,7 +46,7 @@ jobs:
 
       # Version for API
       - name: Run GitVersion for API
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.api-changed == 'true' }}
         uses: gittools/actions/gitversion/execute@v0.9.15
         id: gitversion-api
         with:
@@ -36,13 +54,13 @@ jobs:
           configFilePath: api/GitVersion.yml
 
       - name: Make version.txt file for API
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.api-changed == 'true' }}
         run: |
           echo -n "${{ steps.gitversion-api.outputs.fullSemVer }}" > api/apiVersion.txt
 
       # Version for UI
       - name: Run GitVersion for UI
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.ui-changed == 'true' }}
         uses: gittools/actions/gitversion/execute@v0.9.15
         id: gitversion-ui
         with:
@@ -50,7 +68,7 @@ jobs:
           configFilePath: ui/GitVersion.yml
 
       - name: Make version.txt file for UI
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.ui-changed == 'true' }}
         run: |
           echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
 
@@ -76,10 +94,12 @@ jobs:
 #          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build API Docker image
+        if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
         run: |
           cd api
           docker build -t ghcr.io/${{ steps.tags.outputs.apiTag }} .
       - name: Build UI Docker image
+        if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: |
           cd ui
           docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} .
@@ -88,9 +108,11 @@ jobs:
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push API Docker image
+        if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
         run: docker push ghcr.io/${{ steps.tags.outputs.apiTag }}
 
       - name: Push UI Docker image
+        if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
 
   deploy-prod:
@@ -124,19 +146,50 @@ jobs:
           apiVersion=(cat versions/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
 
-      - name: Bump version and push tag
-        id: tag_version
+      # make a release for the UI
+      - name: Bump version and push UI tag
+        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
+        id: tag-ui-version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ steps.versions.outputs.version }}
+          custom_tag: ui-${{ steps.versions.outputs.uiVersion }}
 
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
+      - name: Create GitHub Release for UI
+        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
+        uses: actions/create-release@v1
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag_name: ui-${{ steps.versions.outputs.uiVersion }}
+          release_name: Release ui-${{ steps.versions.outputs.uiVersion }}
+          body: ${{ steps.tag-ui-version.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      # make a release for the API
+      - name: Bump version and push API tag
+        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
+        id: tag-api-version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: api-${{ steps.versions.outputs.apiVersion }}
+
+      - name: Create GitHub Release for API
+        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
+        uses: actions/create-release@v1
+        with:
+          tag_name: api-${{ steps.versions.outputs.apiVersion }}
+          release_name: Release api-${{ steps.versions.outputs.uiVersion }}
+          body: ${{ steps.tag-api-version.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+#      - name: Create a GitHub release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          tag: ${{ steps.tag_version.outputs.new_tag }}
+#          name: Release ${{ steps.tag_version.outputs.new_tag }}
+#          body: ${{ steps.tag_version.outputs.changelog }}
 
       - name: Your deployment steps
         run: |
