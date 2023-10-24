@@ -34,13 +34,13 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          if [ git diff --quiet HEAD^ HEAD -- ./ui ] || [ github.event.inputs.force-ui-build ]; then
+          if [ git diff --quiet HEAD^ HEAD -- ./ui ] || [ ${{ github.event.inputs.force-ui-build != 'true' }} ]; then
             echo "ui-changed=false" >> $GITHUB_OUTPUT
           else
             echo "ui-changed=true" >> $GITHUB_OUTPUT
           fi
           
-          if [ git diff --quiet HEAD^ HEAD -- ./api ] || [ github.event.inputs.force-api-build ]; then
+          if [ git diff --quiet HEAD^ HEAD -- ./api ] || [ ${{ github.event.inputs.force-api-build != 'true' }} ]; then
             echo "api-changed=false" >> $GITHUB_OUTPUT
           else
             echo "api-changed=true" >> $GITHUB_OUTPUT
