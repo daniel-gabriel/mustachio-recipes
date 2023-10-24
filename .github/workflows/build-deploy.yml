@@ -167,15 +167,23 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ui-${{ steps.versions.outputs.uiVersion }}
 
-      - name: Create GitHub Release for UI
+#      - name: Create GitHub Release for UI
+#        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
+#        uses: actions/create-release@v1
+#        with:
+#          tag_name: ui-${{ steps.versions.outputs.uiVersion }}
+#          release_name: Release ui-${{ steps.versions.outputs.uiVersion }}
+#          body: ${{ steps.tag-ui-version.outputs.changelog }}
+#          draft: false
+#          prerelease: false
+
+      - name: Create a UI GitHub release
         if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ui-${{ steps.versions.outputs.uiVersion }}
-          release_name: Release ui-${{ steps.versions.outputs.uiVersion }}
+          tag: ui-${{ steps.versions.outputs.uiVersion }}
+          name: Release ui-${{ steps.versions.outputs.uiVersion }}
           body: ${{ steps.tag-ui-version.outputs.changelog }}
-          draft: false
-          prerelease: false
 
       # make a release for the API
       - name: Bump version and push API tag
@@ -186,22 +194,23 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: api-${{ steps.versions.outputs.apiVersion }}
 
-      - name: Create GitHub Release for API
-        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
-        uses: actions/create-release@v1
-        with:
-          tag_name: api-${{ steps.versions.outputs.apiVersion }}
-          release_name: Release api-${{ steps.versions.outputs.uiVersion }}
-          body: ${{ steps.tag-api-version.outputs.changelog }}
-          draft: false
-          prerelease: false
-
-#      - name: Create a GitHub release
-#        uses: ncipollo/release-action@v1
+#      - name: Create GitHub Release for API
+#        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
+#        uses: actions/create-release@v1
 #        with:
-#          tag: ${{ steps.tag_version.outputs.new_tag }}
-#          name: Release ${{ steps.tag_version.outputs.new_tag }}
-#          body: ${{ steps.tag_version.outputs.changelog }}
+#          tag_name: api-${{ steps.versions.outputs.apiVersion }}
+#          release_name: Release api-${{ steps.versions.outputs.uiVersion }}
+#          body: ${{ steps.tag-api-version.outputs.changelog }}
+#          draft: false
+#          prerelease: false
+
+      - name: Create an API GitHub release
+        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: api-${{ steps.versions.outputs.apiVersion }}
+          name: Release api-${{ steps.versions.outputs.apiVersion }}
+          body: ${{ steps.tag-api-version.outputs.changelog }}
 
       - name: Your deployment steps
         run: |
