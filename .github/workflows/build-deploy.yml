@@ -153,12 +153,12 @@ jobs:
       - name: Get code version
         id: versions
         run: |
-          uiVersion=(cat versions/ui/uiVersion.txt)
+          uiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/ui/uiVersion.txt)
           echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
-          apiVersion=(cat versions/api/apiVersion.txt)
+          apiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/api/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
 
-      - name: Debug-print the versions
+      - name: Debug-print the versions after
         run: |
           echo "Using versions: [uiVersion] -> ${{ steps.versions.outputs.uiVersion }} [apiVersion] -> ${{ steps.versions.outputs.apiVersion }}" 
 
