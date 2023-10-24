@@ -153,9 +153,9 @@ jobs:
       - name: Get code version
         id: versions
         run: |
-          uiVersion=(cat versions/uiVersion.txt)
+          uiVersion=(cat versions/ui/uiVersion.txt)
           echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
-          apiVersion=(cat versions/apiVersion.txt)
+          apiVersion=(cat versions/api/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
           echo Using versions: [uiVersion] -> $uiVersion [apiVersion] -> $apiVersion 
 
