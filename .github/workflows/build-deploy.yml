@@ -26,6 +26,8 @@ jobs:
       api-changed: ${{ steps.check-changes.outputs.api-changed }}
       docker-ui-tag: ${{ steps.tags.outputs.uiTag }}
       docker-api-tag: ${{ steps.tags.outputs.apiTag }}
+      ui-version: ${{ steps.gitversion-ui.outputs.fullSemVer }}
+      api-version: ${{ steps.gitversion-api.outputs.fullSemVer }}
 
     steps:
       - name: Checkout code
@@ -67,10 +69,10 @@ jobs:
           useConfigFile: true
           configFilePath: api/GitVersion.yml
 
-      - name: Make version.txt file for API
-        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.api-changed == 'true' }}
-        run: |
-          echo -n "${{ steps.gitversion-api.outputs.fullSemVer }}" > api/apiVersion.txt
+#      - name: Make version.txt file for API
+#        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.api-changed == 'true' }}
+#        run: |
+#          echo -n "${{ steps.gitversion-api.outputs.fullSemVer }}" > api/apiVersion.txt
 
       # Version for UI
       - name: Run GitVersion for UI
@@ -81,31 +83,25 @@ jobs:
           useConfigFile: true
           configFilePath: ui/GitVersion.yml
 
-      - name: Make version.txt file for UI
-        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.ui-changed == 'true' }}
-        run: |
-          echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
+#      - name: Make version.txt file for UI
+#        if: ${{ !startsWith(github.ref, 'refs/tags/') && steps.check-changes.outputs.ui-changed == 'true' }}
+#        run: |
+#          echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
 
       # Upload the version artefacts
-      - name: Publish the version artefacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: Versions
-          path: |
-            ui/uiVersion.txt
-            api/apiVersion.txt
+#      - name: Publish the version artefacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: Versions
+#          path: |
+#            ui/uiVersion.txt
+#            api/apiVersion.txt
 
       - name: Make docker image tags
         id: tags
         run: |
           echo "apiTag=${{ github.repository }}/api:${{ steps.gitversion-api.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
           echo "uiTag=${{ github.repository }}/ui:${{ steps.gitversion-ui.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
-
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v1
-#        with:
-#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build API Docker image
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
@@ -147,20 +143,20 @@ jobs:
           additional-approved-words: ''
           additional-denied-words: ''
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: Versions
-          path: versions
-
-      - name: Get code version
-        id: versions
-        run: |
-          uiVersion=$(cat versions/ui/uiVersion.txt)
-          echo "uiVersion=$uiVersion" >> $GITHUB_OUTPUT
-          echo "ui version: $uiVersion"
-          apiVersion=$(cat versions/api/apiVersion.txt)
-          echo "apiVersion=$apiVersion" >> $GITHUB_OUTPUT
-          echo "api version: $apiVersion"
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: Versions
+#          path: versions
+#
+#      - name: Get code version
+#        id: versions
+#        run: |
+#          uiVersion=$(cat versions/ui/uiVersion.txt)
+#          echo "uiVersion=$uiVersion" >> $GITHUB_OUTPUT
+#          echo "ui version: $uiVersion"
+#          apiVersion=$(cat versions/api/apiVersion.txt)
+#          echo "apiVersion=$apiVersion" >> $GITHUB_OUTPUT
+#          echo "api version: $apiVersion"
 
       # make a release for the UI
       - name: Bump version and push UI tag
@@ -169,14 +165,14 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ui-${{ steps.versions.outputs.uiVersion }}
+          custom_tag: ui-${{ needs.build_and_push.outputs.ui-version }}
 
       - name: Create a UI GitHub release
         if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: ui-${{ steps.versions.outputs.uiVersion }}
-          name: Release ui-${{ steps.versions.outputs.uiVersion }}
+          tag: ui-${{ needs.build_and_push.outputs.ui-version }}
+          name: Release ui-${{ needs.build_and_push.outputs.ui-version }}
           body: ${{ steps.tag-ui-version.outputs.changelog }}
 
       # make a release for the API
@@ -186,23 +182,31 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: api-${{ steps.versions.outputs.apiVersion }}
+          custom_tag: api-${{ needs.build_and_push.outputs.api-version }}
 
       - name: Create an API GitHub release
         if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
         uses: ncipollo/release-action@v1
         with:
-          tag: api-${{ steps.versions.outputs.apiVersion }}
-          name: Release api-${{ steps.versions.outputs.apiVersion }}
+          tag: api-${{ needs.build_and_push.outputs.api-version }}
+          name: Release api-${{ needs.build_and_push.outputs.api-version }}
           body: ${{ steps.tag-api-version.outputs.changelog }}
 
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
-      - name: Trigger Synology NAS to pull latest image
+      - name: Trigger Synology NAS to pull latest API image
         env:
           NAS_ADDRESS: ${{ vars.NAS_ADDRESS }}
           NAS_USER: ${{ vars.NAS_USER }}
           NAS_PASSWORD: ${{ secrets.NAS_PASSWORD }}
-        run: |
-          sshpass -p "$NAS_PASSWORD" ssh -o StrictHostKeyChecking=no "https://$NAS_USER@$NAS_ADDRESS" "docker pull ghcr.io/${{ needs.build_and_push.outputs.api-changed }}"
+        run: |          
+          sshpass -p "$NAS_PASSWORD" ssh -o StrictHostKeyChecking=no "https://$NAS_USER@$NAS_ADDRESS" "
+            if [ "${{ needs.build_and_push.outputs.api-changed }}" == "true" ]; then
+              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-api-tag }}
+            fi
+
+            if [ "${{ needs.build_and_push.outputs.ui-changed }}" == "true" ]; then
+              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-ui-tag }}
+            fi
+          "
