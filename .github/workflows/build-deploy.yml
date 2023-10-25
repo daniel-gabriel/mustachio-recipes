@@ -201,7 +201,7 @@ jobs:
           NAS_USER: ${{ vars.NAS_USER }}
           NAS_PASSWORD: ${{ secrets.NAS_PASSWORD }}
         run: |          
-          sshpass -p "$NAS_PASSWORD" ssh -o StrictHostKeyChecking=no "https://$NAS_USER@$NAS_ADDRESS" "
+          sshpass -p "$NAS_PASSWORD" ssh -o StrictHostKeyChecking=no "$NAS_USER@$NAS_ADDRESS" "
             if [ "${{ needs.build_and_push.outputs.api-changed }}" == "true" ]; then
               docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-api-tag }}
             fi
