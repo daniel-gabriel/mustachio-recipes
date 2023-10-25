@@ -24,6 +24,8 @@ jobs:
     outputs:
       ui-changed: ${{ steps.check-changes.outputs.ui-changed }}
       api-changed: ${{ steps.check-changes.outputs.api-changed }}
+      docker-ui-tag: ${{ steps.tags.outputs.uiTag }}
+      docker-api-tag: ${{ steps.tags.outputs.apiTag }}
 
     steps:
       - name: Checkout code
@@ -150,10 +152,6 @@ jobs:
           name: Versions
           path: versions
 
-      - name: Debug-print the versions after
-        run: |
-          echo "Using versions: [uiVersion] -> $(cat versions/ui/uiVersion.txt) [apiVersion] -> $(cat versions/api/apiVersion.txt)" 
-
       - name: Get code version
         id: versions
         run: |
@@ -163,15 +161,6 @@ jobs:
           apiVersion=$(cat versions/api/apiVersion.txt)
           echo "apiVersion=$apiVersion" >> $GITHUB_OUTPUT
           echo "api version: $apiVersion"
-
-#          uiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/ui/uiVersion.txt)
-#          echo "uiVersion=$uiVersion" >> GITHUB_OUTPUT
-#          apiVersion=$([ -f versions/ui/uiVersion.txt ] && cat versions/api/apiVersion.txt)
-#          echo "apiVersion=$apiVersion" >> GITHUB_OUTPUT
-
-      - name: Debug-print the versions after
-        run: |
-          echo "Using versions: [uiVersion] -> ${{ steps.versions.outputs.uiVersion }} [apiVersion] -> ${{ steps.versions.outputs.apiVersion }}" 
 
       # make a release for the UI
       - name: Bump version and push UI tag
@@ -207,7 +196,13 @@ jobs:
           name: Release api-${{ steps.versions.outputs.apiVersion }}
           body: ${{ steps.tag-api-version.outputs.changelog }}
 
-      - name: Your deployment steps
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Trigger Synology NAS to pull latest image
+        env:
+          NAS_ADDRESS: ${{ vars.NAS_ADDRESS }}
+          NAS_USER: ${{ vars.NAS_USER }}
+          NAS_PASSWORD: ${{ secrets.NAS_PASSWORD }}
         run: |
-          # Add your deployment steps here
-          # This part runs only for the main branch
+          sshpass -p "$NAS_PASSWORD" ssh -o StrictHostKeyChecking=no "https://$NAS_USER@$NAS_ADDRESS" "docker pull ghcr.io/${{ needs.build_and_push.outputs.api-changed }}"
