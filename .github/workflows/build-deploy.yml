@@ -207,7 +207,7 @@ jobs:
           # copy docker-compose to the droplet
           scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
-          ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
+          ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<ENDSSH
             # Log in to GitHub Container Registry
             docker login ghcr.io -u "$GHCR_USER" -p "$GHCR_TOKEN"
             
