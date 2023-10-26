@@ -92,7 +92,7 @@ jobs:
       - name: Publish the docker-compose file
         uses: actions/upload-artifact@v3
         with:
-          name: docker
+          name: Docker
           path: |
             docker-compose.yml
 
