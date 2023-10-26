@@ -94,7 +94,7 @@ jobs:
         with:
           name: Docker
           path: |
-            docker-compose.yml
+            docker-compose.*.yml
 
       - name: Make docker image tags
         id: tags
@@ -203,7 +203,7 @@ jobs:
           chmod 600 deploy_key
           
           # copy docker-compose to the droplet
-          scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
+          scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.*.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
           ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
             # Log in to GitHub Container Registry
