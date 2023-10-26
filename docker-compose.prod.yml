@@ -11,7 +11,7 @@ services:
   ui:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/ui:latest
     ports:
-      - "8080:80"
+      - "80:80"
 
   mongodb:
     image: "mongo:latest"
