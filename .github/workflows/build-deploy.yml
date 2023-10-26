@@ -28,6 +28,7 @@ jobs:
       docker-api-tag: ${{ steps.tags.outputs.apiTag }}
       ui-version: ${{ steps.gitversion-ui.outputs.fullSemVer }}
       api-version: ${{ steps.gitversion-api.outputs.fullSemVer }}
+      docker-compose: ${{ steps.docker-compose.outputs.dockerComposeFile }}
 
     steps:
       - name: Checkout code
@@ -125,6 +126,11 @@ jobs:
         if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
 
+      - name: Add docker-compose.yml as an output
+        id: docker-compose
+        run: |
+          echo "dockerComposeFile=$(cat docker-compose.yml)" >> $GITHUB_OUTPUT
+
   deploy-prod:
     needs: build_and_push
     runs-on: ubuntu-latest
@@ -202,8 +208,14 @@ jobs:
         run: |
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
+          
+          # save docker-compose from the previous output
+          echo "${{ needs.build_and_push.outputs.docker-compose }}" > docker-compose.yml
+          
+          # copy docker-compose to the droplet
+          scp -i deploy_key -o StrictHostKeyChecking=no ./docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
-          ssh -i deploy_key -o StrictHostKeyChecking=no "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
+          ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
             # Log in to GitHub Container Registry
             echo "$GHCR_TOKEN" | docker login ghcr.io -u $GHCR_USER --password-stdin
             
@@ -216,8 +228,6 @@ jobs:
               docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-ui-tag }}
             fi
             
-            # Use scp to copy your compose file and any other necessary files to your droplet
-            scp -o StrictHostKeyChecking=no -i deploy_key ./docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
             cd /opt/mustachio
             docker-compose up -d
           ENDSSH
