@@ -192,21 +192,32 @@ jobs:
           name: Release api-${{ needs.build_and_push.outputs.api-version }}
           body: ${{ steps.tag-api-version.outputs.changelog }}
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
-
-      - name: Trigger Synology NAS to pull latest API image
+      - name: Deploy to Digital Ocean
         env:
-          NAS_ADDRESS: ${{ vars.NAS_ADDRESS }}
-          NAS_USER: ${{ vars.NAS_USER }}
-          NAS_PASSWORD: ${{ secrets.NAS_PASSWORD }}
-        run: |          
-          sshpass -p '$NAS_PASSWORD' ssh -o StrictHostKeyChecking=no "$NAS_USER@$NAS_ADDRESS" "
+          DROPLET_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_DROPLET_SSH_PRIVATE_KEY }}
+          DROPLET_ADDRESS: ${{ vars.DIGITAL_OCEAN_DROPLET_IP }}
+          DROPLET_USER: ${{ vars.DIGITAL_OCEAN_DROPLET_USER }}
+          GHCR_USER: ${{ vars.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "$DROPLET_PRIVATE_KEY" > deploy_key
+          chmod 600 deploy_key
+
+          ssh -i deploy_key -o StrictHostKeyChecking=no "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
+            # Log in to GitHub Container Registry
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u $GHCR_USER --password-stdin
+            
+            # Pull the updated Docker images if they have changed
             if [ "${{ needs.build_and_push.outputs.api-changed }}" == "true" ]; then
               docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-api-tag }}
             fi
-
+            
             if [ "${{ needs.build_and_push.outputs.ui-changed }}" == "true" ]; then
               docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-ui-tag }}
             fi
-          "
+            
+            # Use scp to copy your compose file and any other necessary files to your droplet
+            scp -o StrictHostKeyChecking=no -i deploy_key ./docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
+            cd /opt/mustachio
+            docker-compose up -d
+          ENDSSH
