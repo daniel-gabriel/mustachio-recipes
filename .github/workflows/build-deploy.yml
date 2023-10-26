@@ -124,11 +124,6 @@ jobs:
         if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
 
-      - name: Add docker-compose.yml as an output
-        id: docker-compose
-        run: |
-          echo "dockerComposeFile=$(cat docker-compose.yml)" >> $GITHUB_OUTPUT
-
   deploy-prod:
     needs: build_and_push
     runs-on: ubuntu-latest
