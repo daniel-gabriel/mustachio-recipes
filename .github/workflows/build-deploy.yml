@@ -202,6 +202,8 @@ jobs:
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
           
+          echo "using GHCR user $GHCR_USER"
+          
           # copy docker-compose to the droplet
           scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
