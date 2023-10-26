@@ -3,6 +3,22 @@ version: '3'
 services:
   api:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/api:latest
+    ports:
+      - "3002:3000"
+    depends_on:
+      - mongodb
 
   ui:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/ui:latest
+    ports:
+      - "8080:80"
+
+  mongodb:
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
+volumes:
+  mongodata:
