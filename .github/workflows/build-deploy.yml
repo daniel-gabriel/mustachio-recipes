@@ -219,5 +219,5 @@ jobs:
             fi
             
             cd /opt/mustachio
-            docker-compose up -d
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
           ENDSSH
