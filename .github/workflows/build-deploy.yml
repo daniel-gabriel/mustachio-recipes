@@ -28,7 +28,6 @@ jobs:
       docker-api-tag: ${{ steps.tags.outputs.apiTag }}
       ui-version: ${{ steps.gitversion-ui.outputs.fullSemVer }}
       api-version: ${{ steps.gitversion-api.outputs.fullSemVer }}
-      docker-compose: ${{ steps.docker-compose.outputs.dockerComposeFile }}
 
     steps:
       - name: Checkout code
@@ -90,13 +89,12 @@ jobs:
 #          echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
 
       # Upload the version artefacts
-#      - name: Publish the version artefacts
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: Versions
-#          path: |
-#            ui/uiVersion.txt
-#            api/apiVersion.txt
+      - name: Publish the docker-compose file
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker
+          path: |
+            docker-compose.yml
 
       - name: Make docker image tags
         id: tags
@@ -149,10 +147,10 @@ jobs:
           additional-approved-words: ''
           additional-denied-words: ''
 
-#      - uses: actions/download-artifact@v3
-#        with:
-#          name: Versions
-#          path: versions
+      - uses: actions/download-artifact@v3
+        with:
+          name: Docker
+          path: docker
 #
 #      - name: Get code version
 #        id: versions
@@ -209,11 +207,8 @@ jobs:
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
           
-          # save docker-compose from the previous output
-          echo "${{ needs.build_and_push.outputs.docker-compose }}" > docker-compose.yml
-          
           # copy docker-compose to the droplet
-          scp -i deploy_key -o StrictHostKeyChecking=no ./docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
+          scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
           ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
             # Log in to GitHub Container Registry
