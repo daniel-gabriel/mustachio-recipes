@@ -207,7 +207,7 @@ jobs:
 
           ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<'ENDSSH'
             # Log in to GitHub Container Registry
-            docker login ghcr.io -u $GHCR_USER -p "$GHCR_TOKEN"
+            docker login ghcr.io -u "$GHCR_USER" -p "$GHCR_TOKEN"
             
             # Pull the updated Docker images if they have changed
             if [ "${{ needs.build_and_push.outputs.api-changed }}" == "true" ]; then
