@@ -101,28 +101,34 @@ jobs:
         run: |
           echo "apiTag=${{ github.repository }}/api:${{ steps.gitversion-api.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
           echo "uiTag=${{ github.repository }}/ui:${{ steps.gitversion-ui.outputs.fullSemVer }}" >> $GITHUB_OUTPUT
+          echo "apiTagLatest=${{ github.repository }}/api:latest" >> $GITHUB_OUTPUT
+          echo "uiTagLatest=${{ github.repository }}/ui:latest" >> $GITHUB_OUTPUT
 
       - name: Build API Docker image
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
         run: |
           cd api
-          docker build -t ghcr.io/${{ steps.tags.outputs.apiTag }} .
+          docker build -t ghcr.io/${{ steps.tags.outputs.apiTag }} -t ghcr.io/${{ steps.tags.outputs.apiTagLatest }} .
       - name: Build UI Docker image
         if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: |
           cd ui
-          docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} .
+          docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} -t ghcr.io/${{ steps.tags.outputs.uiTagLatest }} .
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push API Docker image
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
-        run: docker push ghcr.io/${{ steps.tags.outputs.apiTag }}
+        run: |
+          docker push ghcr.io/${{ steps.tags.outputs.apiTag }}
+          docker push ghcr.io/${{ steps.tags.outputs.apiTagLatest }}
 
       - name: Push UI Docker image
         if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
-        run: docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
+        run: |
+          docker push ghcr.io/${{ steps.tags.outputs.uiTag }}
+          docker push ghcr.io/${{ steps.tags.outputs.uiTagLatest }}
 
   deploy-prod:
     needs: build_and_push

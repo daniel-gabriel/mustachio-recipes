@@ -19,7 +19,8 @@ import {ApiService} from "@/api";
 
 library.add(fas);
 
-const app = createApp(App)
+const app = createApp(App);
+
 app.component("vue-fontawesome", FontAwesomeIcon);
 
 const pinia: Pinia = createPinia();
