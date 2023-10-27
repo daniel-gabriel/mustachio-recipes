@@ -11,14 +11,18 @@
 </template>
 
 <script lang="ts">
-    import { defineComponent } from 'vue';
     import Navbar from "@/components/Navbar.vue";
     import ToastNotification from "@/components/ToastNotification.vue";
+    import {Component, Vue} from "vue-facing-decorator";
 
-    export default defineComponent({
-        name: 'App',
-        components: {ToastNotification, Navbar},
-    });
+    @Component({
+        components: {ToastNotification, Navbar}
+    })
+    export default class App extends Vue {
+        mounted() {
+            console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
+        }
+    }
 </script>
 
 <style>
