@@ -222,6 +222,8 @@ jobs:
           cp ./docker/docker-compose.prod.yml ./docker-deploy/
           cp ./.env.api ./docker-deploy/
           cp ./.env.ui ./docker-deploy/
+          echo "What is in docker-deploy?"
+          ls ./docker-deploy/
           
           # copy docker-compose to the droplet
           scp -i deploy_key -o StrictHostKeyChecking=no ./docker-deploy/* "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
