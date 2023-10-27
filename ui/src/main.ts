@@ -34,7 +34,7 @@ app.use(Oruga, {
     iconPack: "fas",
     iconComponent: "vue-fontawesome"
 });
-
+console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
 const apiService = new ApiService({
     BASE: import.meta.env.VITE_API_BASE_URL
     // TOKEN: async (): Promise<string> => ""
