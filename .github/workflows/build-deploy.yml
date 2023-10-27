@@ -223,7 +223,7 @@ jobs:
           cp ./.env.api ./docker-deploy/
           cp ./.env.ui ./docker-deploy/
           echo "What is in docker-deploy?"
-          ls ./docker-deploy/
+          ls -al ./docker-deploy/
           echo "What about the 2 env files?"
           echo "./.env.api"
           cat ./.env.api
