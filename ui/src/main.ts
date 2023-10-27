@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import App from "./App.vue"
 import router from "./router"
 import {ApiService} from "@/api";
+import {Config} from "@/Config";
 
 library.add(fas);
 
@@ -36,7 +37,7 @@ app.use(Oruga, {
 });
 console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
 const apiService = new ApiService({
-    BASE: import.meta.env.VITE_API_BASE_URL
+    BASE: Config.API_BASE_URL
     // TOKEN: async (): Promise<string> => ""
 });
 app.provide("apiService", apiService);
