@@ -19,7 +19,7 @@
         components: {ToastNotification, Navbar}
     })
     export default class App extends Vue {
-        mounted() {
+        public mounted(): void {
             console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
         }
     }

@@ -25,6 +25,7 @@
 
         public mounted(): void {
             console.log(`dark mode: ${this.isDarkMode}`);
+            console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
             if (this.isDarkMode) {
                 this.setDocumentTheme("dark");
             }
