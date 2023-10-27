@@ -89,7 +89,7 @@ jobs:
 #          echo -n "${{ steps.gitversion-ui.outputs.fullSemVer }}" > ui/uiVersion.txt
 
       # Upload the version artefacts
-      - name: Publish the docker-compose file
+      - name: Publish the docker-compose files
         uses: actions/upload-artifact@v3
         with:
           name: Docker
@@ -108,11 +108,13 @@ jobs:
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
         run: |
           cd api
+          echo "${{ steps.gitversion-api.outputs.fullSemVer }}" > version.txt
           docker build -t ghcr.io/${{ steps.tags.outputs.apiTag }} -t ghcr.io/${{ steps.tags.outputs.apiTagLatest }} .
       - name: Build UI Docker image
         if: ${{ steps.check-changes.outputs.ui-changed == 'true' }}
         run: |
           cd ui
+          echo "${{ steps.gitversion-ui.outputs.fullSemVer }}" > version.txt
           docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} -t ghcr.io/${{ steps.tags.outputs.uiTagLatest }} .
 
       - name: Login to GitHub Container Registry
