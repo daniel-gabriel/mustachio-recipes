@@ -199,7 +199,7 @@ jobs:
           MONGO_CONNECTION_STRING: "${{ secrets.MONGO_CONNECTION_STRING_PROD }}"
           NODE_ENV: "production"
           API_PORT: "${{ vars.API_PORT_PROD }}"
-          OPENAI_API_KEY: "${{ OPENAI_API_KEY_PROD }}"
+          OPENAI_API_KEY: "${{ vars.OPENAI_API_KEY_PROD }}"
         run: |
           envPath="./.env.api"
           echo "MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING" >> $envPath
