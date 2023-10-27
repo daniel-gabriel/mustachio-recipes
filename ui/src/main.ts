@@ -36,7 +36,7 @@ app.use(Oruga, {
 });
 
 const apiService = new ApiService({
-    BASE: "http://localhost:3002"
+    BASE: import.meta.env.VITE_API_BASE_URL
     // TOKEN: async (): Promise<string> => ""
 });
 app.provide("apiService", apiService);

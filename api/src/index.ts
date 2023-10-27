@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import { DiStartup } from "./startup/di/DiRegistration";
 import { ExpressStartup } from "./startup/ExpressStartup";
 import {ILoggerFactory} from "./startup/LoggerFactory";
-import Keys from "./startup/config/Keys";
+import Config from "./startup/config/Config";
 
 (async () => {
     // DI init
@@ -18,7 +18,7 @@ import Keys from "./startup/config/Keys";
 
     // Database connection
     try {
-        await mongoose.connect("mongodb://mongodb:27017/recipeDB", {
+        await mongoose.connect(Config.MONGO_CONNECTION_STRING || "", {
             // useNewUrlParser: true,
             // useUnifiedTopology: true
         });
@@ -28,7 +28,7 @@ import Keys from "./startup/config/Keys";
         process.exit(1);
     }
 
-    app.listen(Keys.PORT, () => {
-        console.log(`Server is running on port ${Keys.PORT}`);
+    app.listen(Config.API_PORT, () => {
+        console.log(`Server is running on port ${Config.API_PORT}`);
     });
 })();

@@ -3,6 +3,8 @@ version: '3'
 services:
   api:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/api:latest
+    env_file:
+      - .env.api
     ports:
       - "3002:3000"
     depends_on:
@@ -10,6 +12,8 @@ services:
 
   ui:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/ui:latest
+    env_file:
+      - .env.ui
     ports:
       - "80:80"
 

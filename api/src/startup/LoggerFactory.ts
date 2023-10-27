@@ -1,5 +1,5 @@
 import * as pino from "pino";
-import Keys from "./config/Keys";
+import Config from "./config/Config";
 
 export enum LogLevel {
     Error = "error",
@@ -13,7 +13,7 @@ export interface ILoggerFactory {
 }
 
 export class LoggerFactory implements ILoggerFactory {
-    private static readonly DefaultLogLevel: LogLevel = (Keys.NODE_ENV === "production" ? LogLevel.Info : LogLevel.Debug);
+    private static readonly DefaultLogLevel: LogLevel = (Config.NODE_ENV === "production" ? LogLevel.Info : LogLevel.Debug);
 
     public readonly logLevel: LogLevel;
     public constructor(logLevel: LogLevel = LoggerFactory.DefaultLogLevel) {

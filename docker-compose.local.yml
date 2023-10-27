@@ -1,9 +1,11 @@
-version: '3'
+version: "3"
 
 services:
   api:
     build:
       context: ./api
+    env_file:
+      - ./api/.env.local
     ports:
       - "3002:3000"
     depends_on:
@@ -12,6 +14,8 @@ services:
   ui:
     build:
       context: ./ui
+    env_file:
+      - ./ui/.env.local
     ports:
       - "8080:80"
 

@@ -152,16 +152,6 @@ jobs:
         with:
           name: Docker
           path: docker
-#
-#      - name: Get code version
-#        id: versions
-#        run: |
-#          uiVersion=$(cat versions/ui/uiVersion.txt)
-#          echo "uiVersion=$uiVersion" >> $GITHUB_OUTPUT
-#          echo "ui version: $uiVersion"
-#          apiVersion=$(cat versions/api/apiVersion.txt)
-#          echo "apiVersion=$apiVersion" >> $GITHUB_OUTPUT
-#          echo "api version: $apiVersion"
 
       # make a release for the UI
       - name: Bump version and push UI tag
@@ -197,21 +187,44 @@ jobs:
           name: Release api-${{ needs.build_and_push.outputs.api-version }}
           body: ${{ steps.tag-api-version.outputs.changelog }}
 
+      - name: Create .env file for the UI
+        env:
+          VITE_API_BASE_URL: "${{ vars.VITE_API_BASE_URL_PROD }}"
+        run: |
+          envPath="./.env.ui"
+          echo "VITE_API_BASE_URL=$VITE_API_BASE_URL" >> $envPath
+
+      - name: Create .env file for the API
+        env:
+          MONGO_CONNECTION_STRING: "${{ secrets.MONGO_CONNECTION_STRING_PROD }}"
+          NODE_ENV: "production"
+          API_PORT: "${{ vars.API_PORT_PROD }}"
+          OPENAI_API_KEY: "${{ OPENAI_API_KEY_PROD }}"
+        run: |
+          envPath="./.env.api"
+          echo "MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING" >> $envPath
+          echo "NODE_ENV=$NODE_ENV" >> $envPath
+          echo "API_PORT=$API_PORT" >> $envPath
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> $envPath
+
       - name: Deploy to Digital Ocean
         env:
-          DROPLET_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_DROPLET_SSH_PRIVATE_KEY }}
-          DROPLET_ADDRESS: ${{ vars.DIGITAL_OCEAN_DROPLET_IP }}
-          DROPLET_USER: ${{ vars.DIGITAL_OCEAN_DROPLET_USER }}
+          DROPLET_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_DROPLET_SSH_PRIVATE_KEY_PROD }}
+          DROPLET_ADDRESS: ${{ vars.DIGITAL_OCEAN_DROPLET_IP_PROD }}
+          DROPLET_USER: ${{ vars.DIGITAL_OCEAN_DROPLET_USER_PROD }}
           GHCR_USER: ${{ vars.GHCR_USER }}
           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
           
-          echo "using GHCR user $GHCR_USER"
+          mkdir ./docker-deploy
+          cp ./docker/docker-compose.prod.yml ./docker-deploy/
+          cp ./.env.api ./docker-deploy/
+          cp ./.env.ui ./docker-deploy/
           
           # copy docker-compose to the droplet
-          scp -i deploy_key -o StrictHostKeyChecking=no ./docker/docker-compose.prod.yml "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
+          scp -i deploy_key -o StrictHostKeyChecking=no ./docker-deploy/* "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
 
           ssh -i deploy_key -o StrictHostKeyChecking=no -o SendEnv=GHCR_TOKEN -o SendEnv=GHCR_USER "$DROPLET_USER@$DROPLET_ADDRESS" <<ENDSSH
             # Log in to GitHub Container Registry

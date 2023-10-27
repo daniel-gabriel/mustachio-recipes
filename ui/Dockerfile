@@ -15,7 +15,7 @@ COPY . .
 #RUN npm run e2e
 
 # Build the UI
-RUN npm run build
+RUN npm run build production
 
 FROM nginx as production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
