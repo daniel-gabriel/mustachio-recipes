@@ -58,7 +58,7 @@
     export default class HomeView extends Vue {
         private readonly alertStore = useAlertStore();
 
-        public readonly siteName = "MealMemento";
+        public readonly siteName = "Mustachio Recipes";
         public recipeCount = 0;
         public get loggedIn() {
             return false;

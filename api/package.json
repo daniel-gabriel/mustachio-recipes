@@ -1,7 +1,7 @@
 {
-    "name": "meal-memento-api",
+    "name": "mustachio-recipes-api",
     "version": "1.0.0",
-    "description": "Meal Memento API",
+    "description": "Mustachio Recipes API",
     "license": "UNLICENSED",
     "main": "index.js",
     "scripts": {
