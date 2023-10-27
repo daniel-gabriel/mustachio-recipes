@@ -224,6 +224,11 @@ jobs:
           cp ./.env.ui ./docker-deploy/
           echo "What is in docker-deploy?"
           ls ./docker-deploy/
+          echo "What about the 2 env files?"
+          echo "./.env.api"
+          cat ./.env.api
+          echo "./.env.ui"
+          cat ./.env.ui
           
           # copy docker-compose to the droplet
           scp -i deploy_key -o StrictHostKeyChecking=no ./docker-deploy/* "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
