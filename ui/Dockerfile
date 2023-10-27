@@ -19,10 +19,11 @@ COPY . .
 # Build the UI
 RUN npm run build production
 RUN cp ./version.txt ./dist/
-RUN chmod +x entrypoint.sh && cp ./entrypoint.sh ./dist/
 
 FROM nginx as production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=build-stage /app/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 EXPOSE 80
-#CMD ["nginx", "-g", "daemon off;"]
-ENTRYPOINT ["/usr/share/nginx/html/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
