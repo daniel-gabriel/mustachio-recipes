@@ -26,6 +26,8 @@ jobs:
       api-changed: ${{ steps.check-changes.outputs.api-changed }}
       docker-ui-tag: ${{ steps.tags.outputs.uiTag }}
       docker-api-tag: ${{ steps.tags.outputs.apiTag }}
+      docker-ui-tag-latest: ${{ steps.tags.outputs.uiTagLatest }}
+      docker-api-tag-latest: ${{ steps.tags.outputs.apiTagLatest }}
       ui-version: ${{ steps.gitversion-ui.outputs.fullSemVer }}
       api-version: ${{ steps.gitversion-api.outputs.fullSemVer }}
 
@@ -235,11 +237,11 @@ jobs:
             
             # Pull the updated Docker images if they have changed
             if [ "${{ needs.build_and_push.outputs.api-changed }}" == "true" ]; then
-              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-api-tag }}
+              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-api-tag-latest }}
             fi
             
             if [ "${{ needs.build_and_push.outputs.ui-changed }}" == "true" ]; then
-              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-ui-tag }}
+              docker pull ghcr.io/${{ needs.build_and_push.outputs.docker-ui-tag-latest }}
             fi
             
             cd /opt/mustachio
