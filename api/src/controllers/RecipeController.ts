@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Tags, UploadedFile} from "tsoa";
+import {Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Security, Tags, UploadedFile} from "tsoa";
 import {IRecipeRepository} from "../infra/IRecipeRepository";
 import {IRecipe} from "../infra/IRecipe";
 import {inject, injectable} from "tsyringe";
@@ -11,6 +11,7 @@ import {IUpdateRecipe} from "../infra/IUpdateRecipe";
 
 @injectable()
 @Route("recipes")
+@Security("Bearer")
 @Tags("Recipes")
 export class RecipeController extends Controller {
     constructor(
@@ -87,7 +88,7 @@ export class RecipeController extends Controller {
 interface IImageParseRequest {
     buffer: Buffer;
     mimetype: string;
-    originalname: string;
+    originalName: string;
 }
 
 interface ITextParseRequest {

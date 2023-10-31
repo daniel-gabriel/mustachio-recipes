@@ -4,3 +4,4 @@ node_modules
 test-results
 .env*
 version.txt
+firebase-adminsdk-auth-key.json

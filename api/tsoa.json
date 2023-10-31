@@ -3,16 +3,24 @@
     "noImplicitAdditionalProperties": "throw-on-extras",
     "controllerPathGlobs": ["src/controllers/**/*.ts"],
     "spec": {
-      "outputDirectory": "src/tsoa-generated/swagger/v1",
-      "specVersion": 3,
-      "name": "Recipe API",
+        "outputDirectory": "src/tsoa-generated/swagger/v1",
+        "specVersion": 3,
+        "name": "Recipe API",
         "version": "V1",
-        "description": "This is the Recipe API"
+        "description": "This is the Recipe API",
+        "securityDefinitions": {
+            "Bearer": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header"
+            }
+        }
     },
     "routes": {
-      "routesDir": "src/tsoa-generated",
-      "entryFile": "src/index.ts",
-      "iocModule": "src/startup/di/TsyringeTsoaIocContainer.ts"
+        "routesDir": "src/tsoa-generated",
+        "entryFile": "src/index.ts",
+        "iocModule": "src/startup/di/TsyringeTsoaIocContainer.ts",
+        "authenticationModule": "src/startup/TsoaAuth.ts"
     }
-  }
+}
   

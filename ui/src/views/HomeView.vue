@@ -37,8 +37,8 @@
             <section class="hero-foot">
                 <div class="footer-container">
                     <o-field grouped class="centered-field">
-                        <o-button variant="primary">Sign Up</o-button>
-                        <o-button variant="info">Log in</o-button>
+                        <o-button variant="info" @click="signIn('email')">Log in with Email</o-button>
+                        <o-button variant="info" @click="signIn('google')">Log in with Google</o-button>
                     </o-field>
                 </div>
             </section>
@@ -50,21 +50,42 @@
 </template>
 
 <script lang="ts">
-    import {Component, Inject, Vue} from "vue-facing-decorator";
+    import {Component, Inject, Vue, Watch} from "vue-facing-decorator";
     import {ApiService} from "@/api";
     import {useAlertStore} from "@/stores/AlertStore";
+    import type {AuthService} from "@/services/AuthService";
+    import {nameof} from "@/utils/Helpers";
+    import {useAuthStore} from "@/stores/AuthStore";
 
     @Component
     export default class HomeView extends Vue {
         private readonly alertStore = useAlertStore();
+        private readonly authStore = useAuthStore();
 
         public readonly siteName = "Mustachio Recipes";
         public recipeCount = 0;
         public get loggedIn() {
-            return false;
+            return this.authStore.isLoggedIn;
         }
 
-        public async mounted() {
+        @Watch(nameof<HomeView>("loggedIn"))
+        public async onLoggedInChanged() {
+            if (this.loggedIn) {
+                await this.getStats();
+            }
+        }
+
+        @Inject()
+        public apiService!: ApiService;
+
+        @Inject()
+        public authService!: AuthService;
+
+        public async signIn(provider: "google" | "email") {
+            await this.authService.signIn(provider);
+        }
+
+        private async getStats() {
             try {
                 const result = await this.apiService.recipes
                     .getRecipes({pageIndex: 0, pageSize: 1});
@@ -73,9 +94,6 @@
                 this.alertStore.error("Could not get recipe statistics.");
             }
         }
-
-        @Inject()
-        public apiService!: ApiService;
     }
 </script>
 
@@ -88,31 +106,4 @@
 .centered-field {
     margin: 0 auto;
 }
-/*.has-background-img {
-    background-image: url("@/assets/big-chef.png");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}*/
-/*.custom-hero {
-    position: relative;
-}
-.custom-hero::before {
-    content: "";
-    background-image: url("@/assets/big-chef.png");
-    background-size: contain; !* Use contain to fit the image within the hero without cropping *!
-    background-repeat: no-repeat; !* Prevents the image from repeating *!
-    background-position: center center; !* Centers the image *!
-    opacity: .5; !* 50% opacity to the image *!
-
-    !* Cover the entire hero *!
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    !* Display the pseudo-element below the actual content *!
-    z-index: -1;
-}*/
 </style>

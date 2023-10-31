@@ -18,11 +18,7 @@
     @Component({
         components: {ToastNotification, Navbar}
     })
-    export default class App extends Vue {
-        public mounted(): void {
-            console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
-        }
-    }
+    export default class App extends Vue {}
 </script>
 
 <style>

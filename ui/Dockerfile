@@ -4,8 +4,6 @@ FROM node:16 as build-stage
 WORKDIR /app
 
 COPY package*.json ./
-#COPY version.txt ./
-#COPY entrypoint.sh ./
 
 RUN npm install
 
@@ -18,14 +16,20 @@ COPY . .
 
 # Build the UI
 RUN npm run build production
-#RUN cp ./version.txt ./dist/
 
 FROM nginx as production-stage
+
+# Install gettext for envsubst to replace config variables easily
+RUN apt-get update && apt-get install -y gettext
+
+# Copy the app files, including index.html
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-#COPY --from=build-stage /app/entrypoint.sh /entrypoint.sh
+
+# Copy the version.txt, nginx conf file, and the entrypoint.sh script
 COPY version.txt /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY entrypoint.sh /
+
 RUN chmod +x /entrypoint.sh
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

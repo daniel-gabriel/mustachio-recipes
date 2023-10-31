@@ -24,8 +24,6 @@
         public isDarkMode = this.preferencesStore.isDarkTheme;
 
         public mounted(): void {
-            console.log(`dark mode: ${this.isDarkMode}`);
-            console.log(`Using ${import.meta.env.VITE_API_BASE_URL} as the base API url`);
             if (this.isDarkMode) {
                 this.setDocumentTheme("dark");
             }
@@ -38,7 +36,6 @@
             this.isDarkMode = isCheckboxChecked;
             const theme = this.isDarkMode ? "dark" : "light";
             this.setDocumentTheme(theme);
-            console.log(`calling setTheme on ${this.preferencesStore ? "not null" : "null"}`);
             this.preferencesStore.setTheme(theme);
         }
 

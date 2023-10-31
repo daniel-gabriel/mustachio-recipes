@@ -1,48 +1,83 @@
 {
     "compilerOptions": {
-      /* Basic Options */
-      "target": "ES2020",                       // Target ECMAScript version
-      "module": "CommonJS",                     // Use CommonJS module system (suitable for Node.js)
-      "lib": ["ES2020", "DOM"],                // Include standard library files (DOM is included for web projects)
-      "outDir": "./dist",                      // Redirect output files to dist directory
-      "rootDir": "./src",                      // Root directory of input files
-      "removeComments": true,                  // Remove comments in the output files
-      "strict": true,                          // Enable all strict type-checking options
-      "noImplicitAny": true,                   // Raise error on expressions and declarations with an implied 'any' type
-      "strictNullChecks": true,                // Enable strict null checks
-      "strictFunctionTypes": true,             // Enable strict checking of function types
-      "strictBindCallApply": true,             // Enable strict checking for bind/call/apply
-      "strictPropertyInitialization": true,    // Ensure class properties are initialized in the constructor
-      "noImplicitThis": true,                  // Raise error on 'this' expressions with an implied 'any' type
-      "alwaysStrict": true,                    // Ensure 'use strict' is always emitted
-  
-      /* Additional Checks */
-      "noUnusedLocals": true,                  // Report errors on unused locals
-      "noUnusedParameters": true,              // Report errors on unused parameters
-      "noImplicitReturns": true,               // Report error when not all code paths in function return a value
-      "noFallthroughCasesInSwitch": true,      // Report errors for fallthrough cases in switch statement
-  
-      /* Module Resolution Options */
-      "moduleResolution": "node",              // Use Node.js-style module resolution
-      "esModuleInterop": true,                 // Allow default imports from modules with no default export
-      "resolveJsonModule": true,               // Allow importing JSON files as modules
-  
-      /* Source Map Options */
-      "sourceMap": true,                       // Generate corresponding .map file for debugging
-  
-      /* Experimental Options */
-      "experimentalDecorators": true,          // Enables experimental support for ES decorators
-      "emitDecoratorMetadata": true,           // Emit design-type metadata for decorated declarations in source
+        /* Basic Options */
 
-      // Advanced
-      "skipLibCheck": true
+        // Target ECMAScript version
+        "target": "ES2020",
+        // Use CommonJS module system (suitable for Node.js)
+        "module": "CommonJS",
+        // Include standard library files (DOM is included for web projects)
+        "lib": [
+            "ES2020",
+            "DOM"
+        ],
+        // Redirect output files to dist directory
+        "outDir": "./dist",
+        // Root directory of input files
+        "rootDir": "./src",
+        // Remove comments in the output files
+        "removeComments": true,
+        // Enable all strict type-checking options
+        "strict": true,
+        // Raise error on expressions and declarations with an implied 'any' type
+        "noImplicitAny": true,
+        // Enable strict null checks
+        "strictNullChecks": true,
+        // Enable strict checking of function types
+        "strictFunctionTypes": true,
+        // Enable strict checking for bind/call/apply
+        "strictBindCallApply": true,
+        // Ensure class properties are initialized in the constructor
+        "strictPropertyInitialization": true,
+        // Raise error on 'this' expressions with an implied 'any' type
+        "noImplicitThis": true,
+        // Ensure 'use strict' is always emitted
+        "alwaysStrict": true,
+
+        /* Additional Checks */
+
+        // Report errors on unused locals
+        "noUnusedLocals": true,
+        // Report errors on unused parameters
+        "noUnusedParameters": true,
+        // Report error when not all code paths in function return a value
+        "noImplicitReturns": true,
+        // Report errors for fallthrough cases in switch statement
+        "noFallthroughCasesInSwitch": true,
+
+        /* Module Resolution Options */
+
+        // Use Node.js-style module resolution
+        "moduleResolution": "node",
+        // Allow default imports from modules with no default export
+        "esModuleInterop": true,
+        // Allow importing JSON files as modules
+        "resolveJsonModule": true,
+        /* Source Map Options */
+        // Generate corresponding .map file for debugging
+        "sourceMap": true,
+
+        /* Experimental Options */
+
+        // Enables experimental support for ES decorators
+        "experimentalDecorators": true,
+        // Emit design-type metadata for decorated declarations in source
+        "emitDecoratorMetadata": true,
+        // Advanced
+        "skipLibCheck": true
     },
     "include": [
-      "src/**/*.ts"                            // Include all TypeScript files in src directory
+        // Include express.d.ts file
+        "express.d.ts",
+        // Include all TypeScript files in src directory
+        "src/**/*.ts"
     ],
     "exclude": [
-      "node_modules",                          // Exclude the node_modules directory
-      "**/*.spec.ts",                          // Exclude all test files
-      "dist"
+        // Exclude the node_modules directory
+        "node_modules",
+        // Exclude all test files
+        "**/*.spec.ts",
+        // Exclude the dist folder
+        "dist"
     ]
-  }
+}

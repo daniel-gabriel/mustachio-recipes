@@ -194,9 +194,21 @@ jobs:
       - name: Create .env file for the UI
         env:
           API_BASE_URL: "${{ vars.API_BASE_URL_PROD }}"
+          FIREBASE_API_KEY: "${{ vars.FIREBASE_API_KEY_PROD }}"
+          FIREBASE_AUTH_DOMAIN: "${{ vars.FIREBASE_AUTH_DOMAIN_PROD }}"
+          FIREBASE_PROJECT_ID: "${{ vars.FIREBASE_PROJECT_ID_PROD }}"
+          FIREBASE_STORAGE_BUCKET: "${{ vars.FIREBASE_STORAGE_BUCKET_PROD }}"
+          FIREBASE_MESSAGING_SENDER_ID: "${{ vars.FIREBASE_MESSAGING_SENDER_ID_PROD }}"
+          FIREBASE_APP_ID: "${{ vars.FIREBASE_APP_ID_PROD }}"
         run: |
           envPath="./.env.ui"
           echo "API_BASE_URL=$API_BASE_URL" >> $envPath
+          echo "FIREBASE_API_KEY=$FIREBASE_API_KEY" >> $envPath
+          echo "FIREBASE_AUTH_DOMAIN=$FIREBASE_AUTH_DOMAIN" >> $envPath
+          echo "FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID_PROD" >> $envPath
+          echo "FIREBASE_STORAGE_BUCKET=$FIREBASE_STORAGE_BUCKET" >> $envPath
+          echo "FIREBASE_MESSAGING_SENDER_ID=$FIREBASE_MESSAGING_SENDER_ID" >> $envPath
+          echo "FIREBASE_APP_ID=$FIREBASE_APP_ID_PROD" >> $envPath
 
       - name: Create .env file for the API
         env:
@@ -204,6 +216,12 @@ jobs:
           NODE_ENV: "production"
           API_PORT: "${{ vars.API_PORT_PROD }}"
           OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY_PROD }}"
+          FIREBASE_PROJECT_ID: "${{ secrets.FIREBASE_PROJECT_ID_PROD }}"
+          FIREBASE_PRIVATE_KEY_ID: "${{ secrets.FIREBASE_PRIVATE_KEY_ID_PROD }}"
+          FIREBASE_PRIVATE_KEY: "${{ secrets.FIREBASE_PRIVATE_KEY_PROD }}"
+          FIREBASE_CLIENT_EMAIL: "${{ secrets.FIREBASE_CLIENT_EMAIL_PROD }}"
+          FIREBASE_CLIENT_ID: "${{ secrets.FIREBASE_CLIENT_ID_PROD }}"
+          FIREBASE_CLIENT_X509_CERT_URL: "${{ secrets.FIREBASE_CLIENT_X509_CERT_URL_PROD }}"
         run: |
           envPath="./.env.api"
           echo "MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING" >> $envPath

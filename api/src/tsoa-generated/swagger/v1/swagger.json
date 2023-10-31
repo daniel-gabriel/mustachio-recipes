@@ -213,7 +213,13 @@
 				"additionalProperties": false
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"Bearer": {
+				"type": "apiKey",
+				"name": "Authorization",
+				"in": "header"
+			}
+		}
 	},
 	"info": {
 		"title": "Recipe API",
@@ -244,7 +250,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -285,7 +295,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -322,7 +336,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -356,7 +374,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -395,7 +417,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -426,7 +452,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -458,7 +488,11 @@
 				"tags": [
 					"Recipes"
 				],
-				"security": [],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,

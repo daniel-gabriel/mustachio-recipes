@@ -65,14 +65,17 @@
 <script lang="ts">
     // TODO:
     // INFRA
-    // - add sign-in
-    // - add CloudFormation template to deploy the whole thing to an environment in AWS
+    // - add Digital Ocean deployment
+    // - add variables and secrets in GitHub Actions to deploy to production
+    // - show a loading indicator when coming back after logging in
+    // - either make the email login work, or remove that option
 
     // FOR LATER:
     // - add tests everywhere
     // - add servings/portions, cook time, prep time, and nutrition info per serving (calories, carbs, protein, fat)
     // - "chef.png" should also be svg and have rounded corners
 
+    // x add sign-in
     // x replace the "Home" screen with a welcome message (and maybe show some common stats like # or recipes)
     // x add dependency injection to make the ApiService available where needed
     // x add message to Import Modal saying that the import feature is experimental.

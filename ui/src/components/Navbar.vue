@@ -25,24 +25,26 @@
                     <ThemeSwitcher />
                 </div>
 
-<!--                <div v-if="authStore.isLoggedIn" class="navbar-item">-->
-<!--                    <div class="navbar-item has-dropdown is-hoverable">-->
-<!--                        <a class="navbar-link">{{ userDescriptor }}</a>-->
+                <div v-if="authStore.isLoggedIn" class="navbar-item">
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">{{ userDescriptor }}</a>
 
-<!--                        <div class="navbar-dropdown">-->
+                        <div class="navbar-dropdown is-right">
 <!--                            <RouterLink class="navbar-item" to="/settings">Settings</RouterLink>-->
-<!--                            <a class="navbar-item" @click="async () => await logOut()">Log Out</a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div v-if="!authStore.isLoggedIn" class="navbar-item has-dropdown is-hoverable">-->
-<!--                    <a class="navbar-link">Sign Up</a>-->
+                            <a class="navbar-item" @click="async () => await logOut()">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="!authStore.isLoggedIn" class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">Log In</a>
 
-<!--                    <div class="navbar-dropdown">-->
-<!--                        <RouterLink class="navbar-item" to="/consumer-signup">As Consumer</RouterLink>-->
-<!--                        <RouterLink class="navbar-item" to="/vendor-signup">As Vendor</RouterLink>-->
-<!--                    </div>-->
-<!--                </div>-->
+                    <div class="navbar-dropdown is-right">
+                        <a class="navbar-item" @click="signIn('google')">with Google</a>
+                        <a class="navbar-item" @click="signIn('email')">with Email</a>
+<!--                        <RouterLink class="navbar-item" to="/consumer-signup">with Google</RouterLink>-->
+<!--                        <RouterLink class="navbar-item" to="/vendor-signup">with Email</RouterLink>-->
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -51,48 +53,57 @@
 <script lang="ts">
     import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
     import {Component, Inject, Vue} from "vue-facing-decorator";
-    // import {useAuthStore} from "@/stores/AuthStore";
-    import router from "../router";
-    // import {useApiStore} from "@/stores/ApiStore";
-    // import type {IContainer} from "@/di/IContainer";
-    // import type {IAuthService} from "@/services/IAuthService";
+    import type {Router} from "vue-router";
+    import type {AuthService} from "@/services/AuthService";
+    import {useAuthStore} from "@/stores/AuthStore";
 
     @Component({
         components: {ThemeSwitcher}
     })
     export default class Navbar extends Vue {
         public isNavMenuExpanded: boolean = false;
-        // public readonly authStore = useAuthStore();
-        // public readonly apiStore = useApiStore();
 
-        // @Inject
-        // private readonly ioc!: IContainer;
+        @Inject()
+        private router!: Router;
 
-        // public get userDescriptor(): string {
-        //     let descriptor = this.apiStore.profile?.firstName || this.apiStore.profile?.email;
-        //     if (descriptor && this.apiStore.profile?.vendor?.businessName) {
-        //         descriptor += ` - ${this.apiStore.profile?.vendor.businessName}`;
-        //     }
-        //     return descriptor || "Unknown";
-        // }
+        @Inject()
+        private authService!: AuthService;
+
+        public readonly authStore = useAuthStore();
+
+        public get userDescriptor(): string {
+            const user = this.authService.getUser();
+            return user?.displayName || user?.email || "Unknown";
+        }
 
         public toggleNavMenu(): void {
             this.isNavMenuExpanded = !this.isNavMenuExpanded;
         }
 
-        // public async logOut(): Promise<void> {
-        //     await this.ioc.getRequiredService<IAuthService>("authService").signOut();
-        //     await router.push("/login");
-        // }
+        public async signIn(provider: "google" | "email") {
+            await this.authService.signIn(provider);
+        }
+
+        public async logOut(): Promise<void> {
+            await this.authService.signOut();
+            await this.router.push({name: "Home"});
+        }
     }
 </script>
 
 <style scoped>
-.navbar a.navbar-item, .navbar a.navbar-item:visited {
+.navbar a.navbar-item,
+.navbar a.navbar-item:visited,
+.navbar a.navbar-link,
+.navbar a.navbar-link:visited {
     color: var(--color-heading);
 }
 
-.navbar a.navbar-item:hover {
+.navbar a.navbar-item:hover,
+.navbar a.navbar-link:hover,
+.navbar a.navbar-item:active,
+.navbar a.navbar-link:active,
+.navbar .navbar-item.has-dropdown:hover .navbar-link {
     color: var(--color-heading-em);
 }
 </style>

@@ -18,5 +18,11 @@ COPY . .
 # Build the API
 RUN npm run build
 
+COPY firebase-adminsdk-auth-key.template.json /usr/src/app/
+
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3000
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
