@@ -228,6 +228,12 @@ jobs:
           echo "NODE_ENV=$NODE_ENV" >> $envPath
           echo "API_PORT=$API_PORT" >> $envPath
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> $envPath
+          echo "FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID" >> $envPath
+          echo "FIREBASE_PRIVATE_KEY_ID=$FIREBASE_PRIVATE_KEY_ID" >> $envPath
+          echo "FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY" >> $envPath
+          echo "FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL" >> $envPath
+          echo "FIREBASE_CLIENT_ID=$FIREBASE_CLIENT_ID" >> $envPath
+          echo "FIREBASE_CLIENT_X509_CERT_URL=$FIREBASE_CLIENT_X509_CERT_URL" >> $envPath
 
       - name: Deploy to Digital Ocean
         env:
