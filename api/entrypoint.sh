@@ -24,6 +24,7 @@ const finalContents = JSON.stringify(template, null, 4)
 fs.writeFileSync("/usr/src/app/firebase-adminsdk-auth-key.json", finalContents);
 EOF
 
+sed -i 's/\\\\n/\\n/g' /usr/src/app/firebase-adminsdk-auth-key.json
 cat /usr/src/app/firebase-adminsdk-auth-key.json
 
 # Execute CMD from Dockerfile
