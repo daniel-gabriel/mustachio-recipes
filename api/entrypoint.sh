@@ -11,6 +11,8 @@ template.client_email = "~FIREBASE_CLIENT_EMAIL~";
 template.client_id = "~FIREBASE_CLIENT_ID~";
 template.client_x509_cert_url = "~FIREBASE_CLIENT_X509_CERT_URL~";
 
+console.log("private key in the env var: " + process.env.FIREBASE_PRIVATE_KEY);
+
 const finalContents = JSON.stringify(template, null, 4)
     .replace("~FIREBASE_PROJECT_ID~", process.env.FIREBASE_PROJECT_ID)
     .replace("~FIREBASE_PRIVATE_KEY_ID~", process.env.FIREBASE_PRIVATE_KEY_ID)
