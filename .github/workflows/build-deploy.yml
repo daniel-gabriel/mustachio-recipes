@@ -157,6 +157,10 @@ jobs:
           name: Docker
           path: docker
 
+      - name: version-helper
+        run: |
+          echo "timestamp=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+
       # make a release for the UI
       - name: Check if UI tag exists
         id: check-ui-tag
@@ -180,7 +184,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ui-${{ needs.build_and_push.outputs.ui-version }}
-          name: Release ui-${{ needs.build_and_push.outputs.ui-version }}
+          name: Release ui-${{ needs.build_and_push.outputs.ui-version }}-${{ steps.version-helper.timestamp }}
           body: ${{ steps.tag-ui-version.outputs.changelog }}
 
       # make a release for the API
@@ -206,7 +210,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: api-${{ needs.build_and_push.outputs.api-version }}
-          name: Release api-${{ needs.build_and_push.outputs.api-version }}
+          name: Release api-${{ needs.build_and_push.outputs.api-version }}-${{ steps.version-helper.timestamp }}
           body: ${{ steps.tag-api-version.outputs.changelog }}
 
       - name: Create .env file for the UI
