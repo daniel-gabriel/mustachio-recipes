@@ -23,6 +23,6 @@ COPY firebase-adminsdk-auth-key.template.json /usr/src/app/
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 3002
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npm", "start"]
