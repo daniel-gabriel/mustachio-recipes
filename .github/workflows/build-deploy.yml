@@ -158,8 +158,17 @@ jobs:
           path: docker
 
       # make a release for the UI
+      - name: Check if UI tag exists
+        id: check-ui-tag
+        run: |
+          if git ls-remote --tags origin ui-${{ needs.build_and_push.outputs.ui-version }}; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bump version and push UI tag
-        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' }}
+        if: ${{ needs.build_and_push.outputs.ui-changed == 'true' && steps.check-ui-tag.exists == 'true' }}
         id: tag-ui-version
         uses: mathieudutour/github-tag-action@v6.1
         with:
@@ -175,8 +184,17 @@ jobs:
           body: ${{ steps.tag-ui-version.outputs.changelog }}
 
       # make a release for the API
+      - name: Check if API tag exists
+        id: check-api-tag
+        run: |
+          if git ls-remote --tags origin api-${{ needs.build_and_push.outputs.api-version }}; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Bump version and push API tag
-        if: ${{ needs.build_and_push.outputs.api-changed == 'true' }}
+        if: ${{ needs.build_and_push.outputs.api-changed == 'true' && steps.check-api-tag.exists == 'true' }}
         id: tag-api-version
         uses: mathieudutour/github-tag-action@v6.1
         with:
