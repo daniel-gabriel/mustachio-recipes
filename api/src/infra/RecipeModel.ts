@@ -1,47 +1,54 @@
 import { Document, model } from "mongoose";
 import {IAuditDates} from "./IAuditDates";
 import DbHelper from "./DbHelper";
-import {IIngredient} from "./IIngredient";
-import {IStep} from "./IStep";
-import {IMediaUrl} from "./IMediaUrl";
 
-export interface IRecipeModel extends IAuditDates{
+export interface IRecipeModel extends IAuditDates {
+    createdBy: string;
     name: string;
     description: string;
     source?: string;
     additionalNotes?: string;
-    ingredients: {
-        item: string;
-        quantity: number;
-        unit: string;
-    }[];
-    steps: { instructions: string; }[];
-    mediaUrls: {
-        type: "image" | "video";
-        displayName?: string;
-        url: string;
-    }[];
+    ingredients: IIngredientModel[];
+    steps: IStepModel[];
+    mediaUrls: IMediaUrlModel[];
+}
+
+interface IIngredientModel {
+    item: string;
+    quantity: number;
+    unit: string;
+}
+
+interface IStepModel {
+    instructions: string;
+}
+
+interface IMediaUrlModel {
+    type: "image" | "video";
+    displayName?: string;
+    url: string;
 }
 
 export interface IRecipeDoc extends IRecipeModel, Document {}
 
-const ingredientSchema = DbHelper.MakeSchema<IIngredient>({
+const ingredientSchema = DbHelper.MakeSchema<IIngredientModel>({
     item: String,
     quantity: Number,
     unit: String
 });
 
-const stepSchema = DbHelper.MakeSchema<IStep>({
+const stepSchema = DbHelper.MakeSchema<IStepModel>({
     instructions: String
 });
 
-const mediaUrlSchema = DbHelper.MakeSchema<IMediaUrl>({
+const mediaUrlSchema = DbHelper.MakeSchema<IMediaUrlModel>({
     type: String,
     displayName: String,
     url: String
 });
 
 const recipeSchema = DbHelper.MakeSchema<IRecipeModel>({
+    createdBy: String,
     name: String,
     description: String,
     source: String,

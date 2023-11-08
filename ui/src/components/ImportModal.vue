@@ -65,9 +65,9 @@
 <script lang="ts">
     // TODO:
     // INFRA
-    // - add Digital Ocean deployment
-    // - add variables and secrets in GitHub Actions to deploy to production
-    // - show a loading indicator when coming back after logging in
+    // x add Digital Ocean deployment
+    // x add variables and secrets in GitHub Actions to deploy to production
+    // x show a loading indicator when coming back after logging in
     // - either make the email login work, or remove that option
 
     // FOR LATER:

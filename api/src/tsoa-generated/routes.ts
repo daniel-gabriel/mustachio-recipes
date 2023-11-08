@@ -58,6 +58,7 @@ const models: TsoaRoute.Models = {
             "ingredients": {"dataType":"array","array":{"dataType":"refObject","ref":"IIngredient"},"required":true},
             "steps": {"dataType":"array","array":{"dataType":"refObject","ref":"IStep"},"required":true},
             "mediaUrls": {"dataType":"array","array":{"dataType":"refObject","ref":"IMediaUrl"},"required":true},
+            "createdBy": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -113,6 +114,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_getRecipes(request: any, response: any, next: any) {
             const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     pageIndex: {"default":0,"in":"query","name":"pageIndex","dataType":"double"},
                     pageSize: {"default":10,"in":"query","name":"pageSize","dataType":"double"},
             };
@@ -145,6 +147,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_getRecipe(request: any, response: any, next: any) {
             const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 
@@ -176,6 +179,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_createRecipe(request: any, response: any, next: any) {
             const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     recipe: {"in":"body","name":"recipe","required":true,"ref":"IUpdateRecipe"},
             };
 
@@ -207,6 +211,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_updateRecipe(request: any, response: any, next: any) {
             const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
                     updatedRecipe: {"in":"body","name":"updatedRecipe","required":true,"ref":"IUpdateRecipe"},
             };
@@ -239,6 +244,7 @@ export function RegisterRoutes(app: Router) {
 
             async function RecipeController_deleteRecipe(request: any, response: any, next: any) {
             const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
                     id: {"in":"path","name":"id","required":true,"dataType":"string"},
             };
 

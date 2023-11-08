@@ -25,11 +25,17 @@
 
                 <div class="card" :key="props.row.id" @click="goToDisplay(props.row.id)">
                     <header class="card-header is-shadowless">
-                            <p class="card-header-title">{{props.row.name}}</p>
-                        <o-field class="card-header-icon">
-                            <o-button icon-left="pencil" variant="secondary" @click.stop="goToUpdate(props.row.id)"></o-button>
-                            <o-button icon-left="trash" variant="danger" @click.stop="doDelete(props.row)"></o-button>
-                        </o-field>
+                        <div class="card-header-title">
+                            <span v-if="isMine(props.row)" class="tag is-primary owner">Mine</span>
+                            <span v-else class="tag is-warning owner">Friend's</span>
+                            <p>{{props.row.name}}</p>
+                        </div>
+                        <div class="card-header-icon">
+                            <o-field v-if="isMine(props.row)">
+                                <o-button icon-left="pencil" variant="secondary" @click.stop="goToUpdate(props.row.id)"></o-button>
+                                <o-button icon-left="trash" variant="danger" @click.stop="doDelete(props.row)"></o-button>
+                            </o-field>
+                        </div>
                     </header>
                     <div class="card-content columns">
                         <div class="column">
@@ -68,9 +74,12 @@
     import {Component, Emit, Prop, Vue} from "vue-facing-decorator";
     import type {IPagedList_IRecipe_, IRecipe} from "@/api";
     import {IMediaUrl} from "@/api";
+    import {useAuthStore} from "@/stores/AuthStore";
 
     @Component
     export default class ListPagedRecipes extends Vue {
+        private readonly authStore = useAuthStore();
+
         @Prop({default: false})
         public readonly loading!: boolean;
         
@@ -97,16 +106,20 @@
         @Prop({ required: true, type: Number })
         public readonly itemsPerPage!: number;
 
-        public isMainMediaAVideo(recipe: IRecipe) {
+        public isMainMediaAVideo(recipe: IRecipe): boolean {
             return recipe?.mediaUrls?.[0]?.type === IMediaUrl.type.VIDEO;
         }
 
-        public isMainMediaAnImage(recipe: IRecipe) {
+        public isMainMediaAnImage(recipe: IRecipe): boolean {
             return recipe?.mediaUrls?.[0]?.type === IMediaUrl.type.IMAGE;
         }
 
-        public getMainMediaUrl(recipe: IRecipe) {
+        public getMainMediaUrl(recipe: IRecipe): string|undefined {
             return recipe?.mediaUrls?.[0]?.url;
+        }
+
+        public isMine(recipe: IRecipe): boolean {
+            return this.authStore.sub === recipe.createdBy;
         }
 
         @Emit("changePage")
@@ -157,5 +170,8 @@
     justify-content: center;
     align-items: center;
     object-fit: contain;
+}
+.tag.owner {
+    margin-right: 10px;
 }
 </style>

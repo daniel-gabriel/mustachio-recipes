@@ -1,13 +1,16 @@
-import {Body, Controller, Delete, Get, Path, Post, Put, Query, Route, Security, Tags, UploadedFile} from "tsoa";
+import {Body, Controller, Request, Delete, Get, Path, Post, Put, Query, Route, Security, Tags, UploadedFile} from "tsoa";
 import {IRecipeRepository} from "../infra/IRecipeRepository";
 import {IRecipe} from "../infra/IRecipe";
 import {inject, injectable} from "tsyringe";
 import {IPagedList} from "../infra/IPagedList";
 import Tesseract, {OEM, PSM} from "tesseract.js";
-import {ValidationError} from "../infra/error-handling/HttpErrors";
+import {NotFoundError, PermissionError, ValidationError} from "../infra/error-handling/HttpErrors";
 import sharp from "sharp";
 import {IRecipeToJsonConverter} from "../services/IRecipeToJsonConverter";
 import {IUpdateRecipe} from "../infra/IUpdateRecipe";
+import {IPrincipal} from "../startup/auth/IPrincipal";
+import {IGroupRepository} from "../infra/IGroupRepository";
+import {IUserRepository} from "../infra/IUserRepository";
 
 @injectable()
 @Route("recipes")
@@ -16,36 +19,58 @@ import {IUpdateRecipe} from "../infra/IUpdateRecipe";
 export class RecipeController extends Controller {
     constructor(
         @inject("IRecipeRepository") private recipeRepository: IRecipeRepository,
-        @inject("IRecipeToJsonConverter") private recipeToJsonConverter: IRecipeToJsonConverter
+        @inject("IRecipeToJsonConverter") private recipeToJsonConverter: IRecipeToJsonConverter,
+        @inject("IGroupRepository") private groupRepository: IGroupRepository,
+        @inject("IUserRepository") private userRepository: IUserRepository
     ) {
         super();
     }
 
     @Get()
     public async getRecipes(
+        @Request() request: { user: IPrincipal; },
         @Query() pageIndex: number = 0,
         @Query() pageSize: number = 10
     ): Promise<IPagedList<IRecipe>> {
-        return this.recipeRepository.getAll(pageIndex, pageSize);
+        return this.recipeRepository.getAll(request.user.subId, pageIndex, pageSize);
     }
 
     @Get("{id}")
-    public async getRecipe(@Path() id: string): Promise<IRecipe | null> {
-        return this.recipeRepository.getById(id);
+    public async getRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string): Promise<IRecipe | null> {
+        const recipe = await this.recipeRepository.getById(id);
+        if (recipe?.createdBy !== request.user.subId &&
+            !(await this.groupRepository.isMember(request.user.subId, "default", recipe?.createdBy || ""))) {
+            throw new NotFoundError(`Recipe with ID ${id} is not found or is not accessible.`);
+        } else {
+            if (recipe) {
+                recipe.owningUser = {
+                    name: (await this.userRepository.getBySubId(recipe?.createdBy))?.name || ""
+                }
+            }
+            return recipe;
+        }
     }
 
     @Post()
-    public async createRecipe(@Body() recipe: IUpdateRecipe): Promise<IRecipe> {
-        return this.recipeRepository.create(recipe);
+    public async createRecipe(@Request() request: { user: IPrincipal; }, @Body() recipe: IUpdateRecipe): Promise<IRecipe> {
+        return this.recipeRepository.create(request.user.subId, recipe);
     }
 
     @Put("{id}")
-    public async updateRecipe(@Path() id: string, @Body() updatedRecipe: IUpdateRecipe): Promise<IRecipe | null> {
-        return this.recipeRepository.update(id, updatedRecipe);
+    public async updateRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string, @Body() updatedRecipe: IUpdateRecipe): Promise<IRecipe | null> {
+        const recipe = await this.recipeRepository.getById(id);
+        if (recipe?.createdBy !== request.user.subId) {
+            throw new PermissionError(`Recipe with ID ${id} does not belong to you, so you cannot edit it.`);
+        }
+        return this.recipeRepository.update(request.user.subId, id, updatedRecipe);
     }
 
     @Delete("{id}")
-    public async deleteRecipe(@Path() id: string): Promise<boolean> {
+    public async deleteRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string): Promise<boolean> {
+        const recipe = await this.recipeRepository.getById(id);
+        if (recipe?.createdBy !== request.user.subId) {
+            throw new PermissionError(`Recipe with ID ${id} does not belong to you, so you cannot delete it.`);
+        }
         return this.recipeRepository.delete(id);
     }
 

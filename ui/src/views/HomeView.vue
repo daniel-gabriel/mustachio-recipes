@@ -1,6 +1,11 @@
 <template>
     <main class="content">
-        <div v-if="!loggedIn" class="hero">
+        <div v-if="isLoading" class="is-fullwidth" style="height: 100vh;">
+            <o-loading v-model:active="isLoading" :full-page="false">
+                <o-icon icon="sync-alt" size="large" spin />
+            </o-loading>
+        </div>
+        <div v-else-if="!loggedIn" class="hero">
             <section class="hero-head">
                 <h1 class="title has-text-centered is-primary">Welcome to {{ siteName }}!</h1>
             </section>
@@ -64,6 +69,8 @@
 
         public readonly siteName = "Mustachio Recipes";
         public recipeCount = 0;
+        public isLoading = false;
+
         public get loggedIn() {
             return this.authStore.isLoggedIn;
         }
@@ -81,17 +88,26 @@
         @Inject()
         public authService!: AuthService;
 
+        public async mounted() {
+            if (this.loggedIn) {
+                await this.getStats();
+            }
+        }
+
         public async signIn(provider: "google" | "email") {
             await this.authService.signIn(provider);
         }
 
         private async getStats() {
             try {
+                this.isLoading = true;
                 const result = await this.apiService.recipes
                     .getRecipes({pageIndex: 0, pageSize: 1});
                 this.recipeCount = result.totalItems;
             } catch (error) {
                 this.alertStore.error("Could not get recipe statistics.");
+            } finally {
+                this.isLoading = false;
             }
         }
     }

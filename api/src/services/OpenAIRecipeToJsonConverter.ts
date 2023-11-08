@@ -91,6 +91,7 @@ export class OpenAIRecipeToJsonConverter implements IRecipeToJsonConverter {
             steps: convertSteps(responseJson.steps as []),
             mediaUrls: convertMediaUrls(responseJson.mediaUrls),
             ingredients: convertIngredients(responseJson.ingredients as IIngredient[]),
+            createdBy: "",
             lastUpdatedOn: new Date(),
             createdOn: new Date()
         }

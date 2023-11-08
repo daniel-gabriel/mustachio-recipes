@@ -105,6 +105,9 @@
 							"$ref": "#/components/schemas/IMediaUrl"
 						},
 						"type": "array"
+					},
+					"createdBy": {
+						"type": "string"
 					}
 				},
 				"required": [
@@ -115,7 +118,8 @@
 					"description",
 					"ingredients",
 					"steps",
-					"mediaUrls"
+					"mediaUrls",
+					"createdBy"
 				],
 				"type": "object",
 				"additionalProperties": false

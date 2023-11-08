@@ -4,14 +4,18 @@ import {useStateStore} from "@/stores/StateStore";
 import type {Router} from "vue-router";
 
 export const useAuthStore = defineStore("auth", {
-    state: () => ({
+    state: (): IState => ({
         isInitialized: false,
         token: undefined as string | undefined,
+        sub: undefined as string | undefined
     }),
     getters: {
         isLoggedIn(state): boolean {
             return !!state.token;
         },
+        getSubId(state): string | undefined {
+            return state.sub;
+        }
     },
     actions: {
         initialize(authService: AuthService, router: Router) {
@@ -22,6 +26,7 @@ export const useAuthStore = defineStore("auth", {
             authService.initAuthStateListener(async (user) => {
                 if (user) {
                     this.token = await user.getIdToken();
+                    this.sub = user.uid;
                     if (stateStore.nextUrl) {
                         console.log(`User just logged in. Sending to: ${stateStore.nextUrl}`);
                         const nextUrl = stateStore.nextUrl;
@@ -42,3 +47,10 @@ export const useAuthStore = defineStore("auth", {
     },
     persist: false
 });
+
+
+interface IState {
+    isInitialized: boolean,
+    token?: string,
+    sub?: string
+}

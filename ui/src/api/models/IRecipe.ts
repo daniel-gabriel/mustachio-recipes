@@ -24,4 +24,8 @@ export type IRecipe = {
     ingredients: Array<IIngredient>;
     steps: Array<IStep>;
     mediaUrls: Array<IMediaUrl>;
+    createdBy: string;
+    owningUser?: {
+name: string;
+};
 };

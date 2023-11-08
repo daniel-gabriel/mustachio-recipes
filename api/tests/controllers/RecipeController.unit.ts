@@ -1,22 +1,22 @@
-import { RecipeController } from '../../src/controllers/RecipeController';
+import {RecipeController} from "../../src/controllers/RecipeController";
 import {It, Mock} from "typemoq";
-import { IRecipeRepository } from '../../src/infra/IRecipeRepository';
-import { IRecipe } from '../../src/infra/IRecipe';
+import {IRecipeRepository} from "../../src/infra/IRecipeRepository";
+import {IRecipe} from "../../src/infra/IRecipe";
 import {IMock} from "typemoq/Api/IMock";
 
-describe('RecipeController', () => {
+describe("RecipeController", () => {
     let controller: RecipeController;
     let mockRepo: IMock<IRecipeRepository>;
 
     const mockRecipe: IRecipe = {
-        id: '1',
-        name: 'Test Recipe',
-        description: 'Delicious',
-        ingredients: [{ item: 'Salt', quantity: 1, unit: 'tsp' }],
+        id: "1",
+        name: "Test Recipe",
+        description: "Delicious",
+        ingredients: [{item: "Salt", quantity: 1, unit: "tsp"}],
         steps: [{
-            instructions: 'Cook'
+            instructions: "Cook"
         }],
-        mediaUrls: [{ type: 'image', url: 'https://example.com/image.jpg' }],
+        mediaUrls: [{type: "image", url: "https://example.com/image.jpg"}],
     };
 
     beforeEach(() => {
@@ -24,7 +24,7 @@ describe('RecipeController', () => {
         controller = new RecipeController(mockRepo.object);
     });
 
-    it('getRecipes_withNoFilter_returnsAllRecipes', async () => {
+    it("getRecipes_withNoFilter_returnsAllRecipes", async () => {
         // arrange
         mockRepo.setup(m => m.getAll()).returns(async () => [mockRecipe]);
 
@@ -36,7 +36,7 @@ describe('RecipeController', () => {
         expectMatches(result[0], mockRecipe);
     });
 
-    it('getRecipe_withValidId_returnsRecipe', async () => {
+    it("getRecipe_withValidId_returnsRecipe", async () => {
         // arrange
         const expectedId = "some_id";
         mockRepo.setup(m => m.getById(expectedId)).returns(async () => mockRecipe);
@@ -48,7 +48,7 @@ describe('RecipeController', () => {
         expectMatches(result, mockRecipe);
     });
 
-    it('createRecipe_withValidRecipe_createsRecipe', async () => {
+    it("createRecipe_withValidRecipe_createsRecipe", async () => {
         // arrange
         mockRepo.setup(m => m.create(It.isAny())).returns(async () => mockRecipe);
 
@@ -59,16 +59,16 @@ describe('RecipeController', () => {
         expectMatches(result, mockRecipe);
     });
 
-    it('update_withValidData_updatesRecipe', async () => {
+    it("update_withValidData_updatesRecipe", async () => {
         // arrange
         const expectedId = "some_id";
         const updatedRecipe: IRecipe = {
             ...mockRecipe,
-            name: 'Updated Recipe',
-            description: 'Updated Description',
-            ingredients: [...mockRecipe.ingredients, { item: 'Pepper', quantity: 1, unit: 'tsp' }],
-            steps: [...mockRecipe.steps, {instructions: 'Serve'}],
-            mediaUrls: [...mockRecipe.mediaUrls, { type: 'video', url: 'https://example.com/video.mp4' }]
+            name: "Updated Recipe",
+            description: "Updated Description",
+            ingredients: [...mockRecipe.ingredients, {item: "Pepper", quantity: 1, unit: "tsp"}],
+            steps: [...mockRecipe.steps, {instructions: "Serve"}],
+            mediaUrls: [...mockRecipe.mediaUrls, {type: "video", url: "https://example.com/video.mp4"}]
         };
         mockRepo.setup(m => m.update(expectedId, updatedRecipe)).returns(async () => updatedRecipe);
 
@@ -79,7 +79,7 @@ describe('RecipeController', () => {
         expectMatches(result, updatedRecipe);
     });
 
-    it('deleteRecipe_withValidId_deletesRecipe', async () => {
+    it("deleteRecipe_withValidId_deletesRecipe", async () => {
         // arrange
         const expectedId = "some_id";
         mockRepo.setup(m => m.delete(expectedId)).returns(async () => true);

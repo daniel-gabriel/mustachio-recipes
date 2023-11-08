@@ -1,22 +1,27 @@
-import { MongoRecipeRepository } from '../../src/infra/MongoRecipeRepository';
-import { IRecipe } from '../../src/infra/IRecipe';
+import {MongoRecipeRepository} from "../../src/infra/MongoRecipeRepository";
+import {IRecipe} from "../../src/infra/IRecipe";
 import {MongoTestHelper} from "../_utils/MongoTestHelper";
+import {GroupModel} from "../../src/infra/GroupModel";
 
 const mongoTestHelper = new MongoTestHelper();
 
-describe('MongoRecipeRepository', () => {
+describe("MongoRecipeRepository", () => {
     let repo: MongoRecipeRepository;
 
+    const mockUser = "mockSubId";
     const mockRecipe: IRecipe = {
-        id: '1',
-        name: 'Test Recipe',
-        description: 'Delicious',
-        ingredients: [{ item: 'Salt', quantity: 1, unit: 'tsp' }],
+        id: "1",
+        name: "Test Recipe",
+        description: "Delicious",
+        ingredients: [{item: "Salt", quantity: 1, unit: "tsp"}],
         steps: [{
-            instructions: 'Cook'
+            instructions: "Cook"
         }],
-        mediaUrls: [{ type: 'image', url: 'http://example.com/image.jpg' }],
-    };
+        mediaUrls: [{type: "image", url: "http://example.com/image.jpg"}],
+        createdBy: mockUser,
+        createdOn: new Date(),
+        lastUpdatedOn: new Date()
+    } as IRecipe;
 
     beforeAll(async () => {
         await mongoTestHelper.startInMemoryMongo();
@@ -26,31 +31,67 @@ describe('MongoRecipeRepository', () => {
     afterAll(async () => {
         await mongoTestHelper.stopInMemoryMongo();
     });
-    it('create_withValidRecipe_createsRecipe', async () => {
+
+    it("create_withValidRecipe_createsRecipe", async () => {
         // act
-        const createdRecipe = await repo.create(mockRecipe);
+        const createdRecipe = await repo.create(mockUser, mockRecipe);
 
         // assert
         expectMatches(createdRecipe, mockRecipe);
     });
 
-    it('getAll_withNoParameters_returnsAllRecipes', async () => {
+    it("getAll_withMembersInDefaultGroup_returnsAllOwnedAndMemberRecipes", async () => {
         // arrange
-        const expectedRecipe1 = await repo.create(mockRecipe);
-        const expectedRecipe2 = await repo.create({ ...mockRecipe, name: 'Another Test Recipe', id: "another_recipe_id" });
+        const memberUser = "memberMockSubId";
+        const expectedRecipe = await repo.create(mockUser, mockRecipe);
+        const expectedMemberRecipe = await repo.create(memberUser, {
+            ...mockRecipe,
+            name: "Yet Another Test Recipe"
+        });
+        // make memberUser a member of mockUser's default group
+        const group = new GroupModel({
+            name: "default",
+            owner: mockUser,
+            members: [{subId: memberUser}]
+        });
+        await group.save();
 
         // act
-        const recipes = await repo.getAll();
+        const recipes = await repo.getAll(mockUser);
 
         // assert
-        expect(recipes.length).toBeGreaterThanOrEqual(2);
-        expectMatches(recipes.find(r => r.id === expectedRecipe1.id), expectedRecipe1, true);
-        expectMatches(recipes.find(r => r.id === expectedRecipe2.id), expectedRecipe2, true);
+        expect(recipes.totalItems).toBeGreaterThanOrEqual(2);
+        expect(recipes.data.length).toBeGreaterThanOrEqual(2);
+        expect(recipes.data.find(r => r.id === expectedRecipe.id)).not.toBeUndefined();
+        expect(recipes.data.find(r => r.id === expectedMemberRecipe.id)).not.toBeUndefined();
     });
 
-    it('getById_withValidId_returnsRecipe', async () => {
+    it("getAll_withNoParameters_returnsAllOwnedAndMemberRecipes", async () => {
         // arrange
-        const createdRecipe = await repo.create(mockRecipe);
+        const expectedRecipe1 = await repo.create(mockUser, mockRecipe);
+        const expectedRecipe2 = await repo.create(mockUser, {
+            ...mockRecipe,
+            name: "Another Test Recipe"
+        });
+        const unexpectedRecipe = await repo.create("another subId", {
+            ...mockRecipe,
+            name: "Someone else's recipe"
+        });
+
+        // act
+        const recipes = await repo.getAll(mockUser);
+
+        // assert
+        expect(recipes.totalItems).toBeGreaterThanOrEqual(2);
+        expect(recipes.data.length).toBeGreaterThanOrEqual(2);
+        expectMatches(recipes.data.find(r => r.id === expectedRecipe1.id), expectedRecipe1, true);
+        expectMatches(recipes.data.find(r => r.id === expectedRecipe2.id), expectedRecipe2, true);
+        expect(recipes.data.find(r => r.id === unexpectedRecipe.id)).toBeUndefined();
+    });
+
+    it("getById_withValidOwnedId_returnsRecipe", async () => {
+        // arrange
+        const createdRecipe = await repo.create(mockUser, mockRecipe);
 
         // act
         const retrievedRecipe = await repo.getById(createdRecipe.id!);
@@ -61,25 +102,25 @@ describe('MongoRecipeRepository', () => {
         expect(retrievedRecipe?.name).toBe(createdRecipe.name);
     });
 
-    it('update_withValidUpdateData_updatesRecipe', async () => {
+    it("update_withValidUpdateData_updatesRecipe", async () => {
         // arrange
-        const createdRecipe = await repo.create(mockRecipe);
+        const createdRecipe = await repo.create(mockUser, mockRecipe);
         const updatedRecipeData: IRecipe = {
             ...createdRecipe,
-            name: 'Updated Recipe Name'
+            name: "Updated Recipe Name"
         };
 
         // act
-        const updatedRecipe = await repo.update(createdRecipe.id!, updatedRecipeData);
+        const updatedRecipe = await repo.update(mockUser, createdRecipe.id!, updatedRecipeData);
 
         // assert
         expect(updatedRecipe).not.toBeNull();
         expect(updatedRecipe?.name).toBe(updatedRecipeData.name);
     });
 
-    it('delete_withValidId_deletesRecipe', async () => {
+    it("delete_withValidId_deletesRecipe", async () => {
         // arrange
-        const createdRecipe = await repo.create(mockRecipe);
+        const createdRecipe = await repo.create(mockUser, mockRecipe);
 
         // act
         const isDeleted = await repo.delete(createdRecipe.id!);

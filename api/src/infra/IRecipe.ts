@@ -18,6 +18,8 @@ export interface IRecipe extends IAuditDates{
     ingredients: IIngredient[];
     steps: IStep[];
     mediaUrls: IMediaUrl[];
+    createdBy: string;
+    owningUser?: {name: string};
     createdOn: Date;
     lastUpdatedOn: Date;
 }

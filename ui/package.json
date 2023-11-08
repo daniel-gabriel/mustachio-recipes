@@ -11,7 +11,7 @@
     "build-only": "vite build --mode",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "generate-client-local": "rm -rf src/api && openapi --input http://localhost:3000/docs/v1/swagger.json --output src/api --name ApiService --useOptions"
+    "generate-client-local": "rm -rf src/api && openapi --input http://localhost:3002/docs/v1/swagger.json --output src/api --name ApiService --useOptions"
   },
   "dependencies": {
     "@bulvar/bulma": "^0.11.14",

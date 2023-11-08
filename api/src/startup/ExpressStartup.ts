@@ -5,7 +5,6 @@ import { RegisterRoutes } from "../tsoa-generated/routes";
 import * as cors from "cors";
 import {ILogger} from "./LoggerFactory";
 import {DefaultErrorToProblemJsonConverter} from "../infra/error-handling/DefaultErrorToProblemJsonConverter";
-import {FirebaseAuthMiddleware} from "../middleware/FirebaseAuthMiddleware";
 
 export class ExpressStartup {
     public static init(logger: ILogger) {
@@ -22,7 +21,6 @@ export class ExpressStartup {
         // Register TSOA routes
         RegisterRoutes(app);
         this.useErrorHandling(app, logger);
-        this.useFirebaseSecurity(app);
 
         return app;
     }
@@ -39,7 +37,7 @@ export class ExpressStartup {
         app.use("/docs", express.static(staticFolder));
 
         const options = <swaggerUi.SwaggerUiOptions> {
-            customfavIcon: "/docs/assets/favicon.webp",
+            customfavIcon: "/docs/assets/favicon.png",
             customCssUrl: "/docs/css/theme-newspaper.css",
             customCss: ".swagger-ui .topbar { display: none }",
             swaggerOptions: {
@@ -60,9 +58,5 @@ export class ExpressStartup {
             res: express.Response,
             next: express.NextFunction
         ): void => errorToJsonConverter.sendErrorAsProblemJson(err as any, req, res, next));
-    }
-
-    private static useFirebaseSecurity(app: express.Express) {
-        app.use(new FirebaseAuthMiddleware("firebase-adminsdk-auth-key.json").authorize);
     }
 }
