@@ -48,7 +48,8 @@
             </section>
         </div>
         <div v-else>
-            <p><span class="has-text-weight-bold">{{recipeCount}}</span> recipes in your recipe book</p>
+            <p><span class="has-text-weight-bold">{{ myRecipesCount }}</span> recipe(s) that you own</p>
+            <p><span class="has-text-weight-bold">{{ friendsRecipesCount }}</span> recipe(s) that your friends own</p>
         </div>
     </main>
 </template>
@@ -65,19 +66,20 @@
     @Component({
         components: {GoogleSignInButton}
     })
-    export default class HomeView extends Vue {
+    export default class DashboardView extends Vue {
         private readonly alertStore = useAlertStore();
         private readonly authStore = useAuthStore();
 
         public readonly siteName = "Mustachio Recipes";
-        public recipeCount = 0;
+        public myRecipesCount = 0;
+        public friendsRecipesCount = 0;
         public isLoading = false;
 
         public get loggedIn() {
             return this.authStore.isLoggedIn;
         }
 
-        @Watch(nameof<HomeView>("loggedIn"))
+        @Watch(nameof<DashboardView>("loggedIn"))
         public async onLoggedInChanged() {
             if (this.loggedIn) {
                 await this.getStats();
@@ -103,9 +105,9 @@
         private async getStats() {
             try {
                 this.isLoading = true;
-                const result = await this.apiService.recipes
-                    .getRecipes({pageIndex: 0, pageSize: 1});
-                this.recipeCount = result.totalItems;
+                const result = await this.apiService.recipes.getStats();
+                this.myRecipesCount = result.myRecipesCount;
+                this.friendsRecipesCount = result.friendsRecipesCount;
             } catch (error) {
                 this.alertStore.error("Could not get recipe statistics.");
             } finally {

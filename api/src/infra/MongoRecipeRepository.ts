@@ -1,14 +1,43 @@
-import { IRecipeDoc, IRecipeModel, RecipeModel } from "./RecipeModel";
-import { IRecipe } from "./IRecipe";
-import { IRecipeRepository } from "./IRecipeRepository";
-import { IIngredient } from "./IIngredient";
+import {IRecipeDoc, IRecipeModel, RecipeModel} from "./RecipeModel";
+import {IRecipe} from "./IRecipe";
+import {IRecipeRepository} from "./IRecipeRepository";
+import {IIngredient} from "./IIngredient";
 import {IStep} from "./IStep";
 import {IPagedList} from "./IPagedList";
 import {IUpdateRecipe} from "./IUpdateRecipe";
 import {GroupModel, IGroupModel, IMemberModel} from "./GroupModel";
 import {nameof} from "../utils/Helpers";
+import {IRecipeStats} from "./IRecipeStats";
 
 export class MongoRecipeRepository implements IRecipeRepository {
+
+    public async getStats(userSubId: string): Promise<IRecipeStats> {
+        const memberSubIds = await this.getGroupMembers(userSubId);
+        const pipeline = [{
+            $facet: {
+                myRecipesCount: [{
+                    $match: {
+                        [nameof<IRecipeModel>("createdBy")]: userSubId
+                    }
+                },
+                    {$count: "count"}
+                ],
+                friendsRecipesCount: [{
+                    $match: {
+                        [nameof<IRecipeModel>("createdBy")]: {$in: memberSubIds}
+                    }
+                },
+                    {$count: "count"}
+                ]
+            }
+        }];
+        const result = (await RecipeModel.aggregate(pipeline).exec())?.[0];
+
+        return {
+            myRecipesCount: result.myRecipesCount?.[0]?.count || 0,
+            friendsRecipesCount: result.friendsRecipesCount?.[0]?.count || 0
+        };
+    }
 
     public async getAll(userSubId: string, pageIndex: number = 0, pageSize: number = 10): Promise<IPagedList<IRecipe>> {
         // validate paging

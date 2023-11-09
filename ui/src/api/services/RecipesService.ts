@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { IPagedList_IRecipe_ } from '../models/IPagedList_IRecipe_';
 import type { IRecipe } from '../models/IRecipe';
+import type { IRecipeStats } from '../models/IRecipeStats';
 import type { ITextParseRequest } from '../models/ITextParseRequest';
 import type { IUpdateRecipe } from '../models/IUpdateRecipe';
 
@@ -49,6 +50,17 @@ requestBody: IUpdateRecipe,
             url: '/recipes',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns IRecipeStats Ok
+     * @throws ApiError
+     */
+    public getStats(): CancelablePromise<IRecipeStats> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/recipes/stats',
         });
     }
 

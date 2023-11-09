@@ -1,6 +1,6 @@
 <template>
-    <div v-if="!loggedIn" class="hero">
-        <section class="hero-body">
+    <div class="hero">
+        <section v-if="!loggedIn" class="hero-body">
             <div class="columns is-vcentered">
                 <div class="column has-vertical-separator is-hidden-mobile">
                     <img src="@/assets/big-chef.png" alt="Picture of a chef" style="height: 350px; width: auto;"/>
@@ -10,7 +10,13 @@
                 </div>
             </div>
         </section>
-
+        <section v-else class="hero-body">
+            <p class="subtitle">You're already logged in. Not sure what to do next? Choose one of the options below.</p>
+            <o-field grouped>
+                <RouterLink to="/" class="button is-primary">Go to the Dashboard</RouterLink>
+                <RouterLink to="/recipes" class="button is-primary">Go to your Recipes list</RouterLink>
+            </o-field>
+        </section>
     </div>
 </template>
 

@@ -16,7 +16,7 @@
 
         <div id="navbarBurgerMenu" class="navbar-menu" :class="{'is-active': isNavMenuExpanded}">
             <div class="navbar-start">
-                <RouterLink class="navbar-item" to="/">Home</RouterLink>
+                <RouterLink class="navbar-item" to="/">Dashboard</RouterLink>
                 <RouterLink class="navbar-item" to="/recipes">Recipes</RouterLink>
             </div>
 
@@ -79,7 +79,7 @@
 
         public async logOut(): Promise<void> {
             await this.authService.signOut();
-            await this.router.push({name: "Home"});
+            await this.router.push({name: "Dashboard"});
         }
     }
 </script>

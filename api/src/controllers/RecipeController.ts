@@ -11,6 +11,7 @@ import {IUpdateRecipe} from "../infra/IUpdateRecipe";
 import {IPrincipal} from "../startup/auth/IPrincipal";
 import {IGroupRepository} from "../infra/IGroupRepository";
 import {IUserRepository} from "../infra/IUserRepository";
+import {IRecipeStats} from "../infra/IRecipeStats";
 
 @injectable()
 @Route("recipes")
@@ -33,6 +34,13 @@ export class RecipeController extends Controller {
         @Query() pageSize: number = 10
     ): Promise<IPagedList<IRecipe>> {
         return this.recipeRepository.getAll(request.user.subId, pageIndex, pageSize);
+    }
+
+    @Get("stats")
+    public async getStats(
+        @Request() request: { user: IPrincipal; }
+    ): Promise<IRecipeStats> {
+        return this.recipeRepository.getStats(request.user.subId);
     }
 
     @Get("{id}")

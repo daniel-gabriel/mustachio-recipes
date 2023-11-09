@@ -1,5 +1,5 @@
 import {createRouter, createWebHistory, type Router} from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import DashboardView from "../views/DashboardView.vue";
 import type {AuthService} from "@/services/AuthService";
 import {useStateStore} from "@/stores/StateStore";
 import LoginView from "@/views/LoginView.vue";
@@ -10,8 +10,8 @@ export function initRouter(authService: AuthService): Router {
         routes: [
             {
                 path: "/",
-                name: "Home",
-                component: HomeView
+                name: "Dashboard",
+                component: DashboardView
             },
             {
                 path: "/login",
