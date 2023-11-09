@@ -1,11 +1,10 @@
 import { initializeApp, type FirebaseOptions } from "firebase/app";
 import { getAuth, onAuthStateChanged, signInWithRedirect, signOut,
-    type Auth, type User, GoogleAuthProvider, EmailAuthProvider } from "firebase/auth";
+    type Auth, type User, GoogleAuthProvider } from "firebase/auth";
 
 export class AuthService {
     private readonly auth: Auth;
     private googleProvider = new GoogleAuthProvider();
-    private emailProvider = new EmailAuthProvider();
 
     public constructor(config: FirebaseOptions) {
         const app = initializeApp(config);
@@ -20,10 +19,11 @@ export class AuthService {
     }
 
     // Redirect to Firebase hosted auth page
-    public async signIn(provider: "google"|"email"): Promise<void> {
-        const authProvider = provider === "google" ?
-            this.googleProvider : this.emailProvider;
-        await signInWithRedirect(this.auth, authProvider);
+    public async signIn(provider: "google"): Promise<void> {
+        if (provider !== "google") {
+            throw new Error(`Trying to log in with an unsupported provider: ${provider}`);
+        }
+        await signInWithRedirect(this.auth, this.googleProvider);
     }
 
     // Sign out

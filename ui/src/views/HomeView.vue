@@ -42,8 +42,7 @@
             <section class="hero-foot">
                 <div class="footer-container">
                     <o-field grouped class="centered-field">
-                        <o-button variant="info" @click="signIn('email')">Log in with Email</o-button>
-                        <o-button variant="info" @click="signIn('google')">Log in with Google</o-button>
+                        <google-sign-in-button @clicked="signIn('google')"/>
                     </o-field>
                 </div>
             </section>
@@ -61,8 +60,11 @@
     import type {AuthService} from "@/services/AuthService";
     import {nameof} from "@/utils/Helpers";
     import {useAuthStore} from "@/stores/AuthStore";
+    import GoogleSignInButton from "@/components/GoogleSignInButton.vue";
 
-    @Component
+    @Component({
+        components: {GoogleSignInButton}
+    })
     export default class HomeView extends Vue {
         private readonly alertStore = useAlertStore();
         private readonly authStore = useAuthStore();
@@ -94,7 +96,7 @@
             }
         }
 
-        public async signIn(provider: "google" | "email") {
+        public async signIn(provider: "google") {
             await this.authService.signIn(provider);
         }
 

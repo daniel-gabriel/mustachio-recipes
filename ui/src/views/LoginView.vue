@@ -1,16 +1,16 @@
 <template>
     <div v-if="!loggedIn" class="hero">
-        <section class="card">
-            <div class="card-header">
-                <div class="card-title">Login</div>
-            </div>
-            <div class="card-content">
-                <o-field grouped class="centered-field">
-                    <o-button variant="info" @click="signIn('email')">Log in with Email</o-button>
-                    <o-button variant="info" @click="signIn('google')">Log in with Google</o-button>
-                </o-field>
+        <section class="hero-body">
+            <div class="columns is-vcentered">
+                <div class="column has-vertical-separator is-hidden-mobile">
+                    <img src="@/assets/big-chef.png" alt="Picture of a chef" style="height: 350px; width: auto;"/>
+                </div>
+                <div class="column is-flex is-justify-content-center is-align-items-center">
+                    <google-sign-in-button @clicked="signIn('google')"/>
+                </div>
             </div>
         </section>
+
     </div>
 </template>
 
@@ -18,8 +18,11 @@
     import {Component, Inject, Vue} from "vue-facing-decorator";
     import type {AuthService} from "@/services/AuthService";
     import {useAuthStore} from "@/stores/AuthStore";
+    import GoogleSignInButton from "@/components/GoogleSignInButton.vue";
 
-    @Component
+    @Component({
+        components: {GoogleSignInButton}
+    })
     export default class LoginView extends Vue {
         private readonly authStore = useAuthStore();
 
@@ -30,11 +33,15 @@
         @Inject()
         public authService!: AuthService;
 
-        public async signIn(provider: "google" | "email") {
+        public async signIn(provider: "google") {
             await this.authService.signIn(provider);
         }
     }
 </script>
 
 <style scoped>
+.has-vertical-separator {
+    border-right: 1px solid;
+    border-right-color: var(--color-border-disabled);
+}
 </style>

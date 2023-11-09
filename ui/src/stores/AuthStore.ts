@@ -4,7 +4,7 @@ import {useStateStore} from "@/stores/StateStore";
 import type {Router} from "vue-router";
 
 export const useAuthStore = defineStore("auth", {
-    state: (): IState => ({
+    state: (): IAuthState => ({
         isInitialized: false,
         token: undefined as string | undefined,
         sub: undefined as string | undefined
@@ -49,7 +49,7 @@ export const useAuthStore = defineStore("auth", {
 });
 
 
-interface IState {
+export interface IAuthState {
     isInitialized: boolean,
     token?: string,
     sub?: string

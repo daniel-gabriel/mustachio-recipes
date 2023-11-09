@@ -74,6 +74,7 @@
 
     --color-border: var(--mm-grey);
     --color-border-hover: var(--mm-grey-soft);
+    --color-border-disabled: var(--mm-grey-dark);
 
     --color-heading: var(--mm-green-super-dark);
     --color-heading-em: var(--mm-green-very-dark);
@@ -106,6 +107,7 @@
 
     --color-border: var(--mm-yellow);
     --color-border-hover: var(--mm-yellow-soft);
+    --color-border-disabled: var(--mm-yellow-dark);
 
     --color-heading: var(--mm-blue-light);
     --color-heading-em: var(--mm-blue);
