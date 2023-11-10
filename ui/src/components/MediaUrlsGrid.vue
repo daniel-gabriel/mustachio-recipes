@@ -71,7 +71,15 @@
             return msg ? "danger" : "";
         }
 
-        public async handleFileChange(files: File[]) {
+        public focusLastRowInput(placeholder: string = "Image or Video URL") {
+            this.$nextTick(() => {
+                const inputs = this.$el.querySelectorAll(`input[placeholder="${placeholder}"]`);
+                const lastInput = inputs[inputs.length - 1] as HTMLInputElement | undefined;
+                lastInput?.focus();
+            });
+        }
+
+        public async handleFileChange() {
             let showError = false;
             for (const media of this.files) {
                 // Create a preview URL for the selected file

@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue, Prop, Emit } from "vue-facing-decorator";
+    import {Component, Vue, Prop, Emit} from "vue-facing-decorator";
     import type {IIngredientParams} from "@/components/params/IIngredientParams";
 
     @Component
@@ -44,6 +44,14 @@
 
         public variant(msg?: string) {
             return msg ? "danger" : "";
+        }
+
+        public focusLastRowInput(placeholder: string = "Name") {
+            this.$nextTick(() => {
+                const inputs = this.$el.querySelectorAll(`input[placeholder="${placeholder}"]`);
+                const lastInput = inputs[inputs.length - 1] as HTMLInputElement | undefined;
+                lastInput?.focus();
+            });
         }
 
         @Emit("removeIngredient")

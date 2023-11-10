@@ -40,6 +40,14 @@
             return msg ? "danger" : "";
         }
 
+        public focusLastRowInput(placeholder: string = "Instruction step") {
+            this.$nextTick(() => {
+                const inputs = this.$el.querySelectorAll(`input[placeholder="${placeholder}"]`);
+                const lastInput = inputs[inputs.length - 1] as HTMLInputElement | undefined;
+                lastInput?.focus();
+            });
+        }
+
         @Emit("removeStep")
         removeStep(index: number) {
             return index;

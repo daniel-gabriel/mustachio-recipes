@@ -2,7 +2,7 @@
     <div>
         <!-- General info -->
         <o-field label="Name" :message="errors.name" :variant="variant(errors.name as string)">
-            <o-input :disabled="loading" v-model="recipe.name" placeholder="Enter recipe name"></o-input>
+            <o-input ref="recipeName" :disabled="loading" v-model="recipe.name" placeholder="Enter recipe name"></o-input>
         </o-field>
 
         <o-field label="Description" :message="errors.description" :variant="variant(errors.description as string)">
@@ -18,6 +18,7 @@
         <o-field label="Ingredients" :message="errors.ingredientsCollection"
                  :variant="variant(errors.ingredientsCollection as string)">
             <IngredientsGrid
+                ref="ingredientGrid"
                 :loading="loading"
                 :ingredients="recipe.ingredients"
                 :ingredientErrors="errors?.ingredients"
@@ -27,8 +28,10 @@
         </o-field>
 
         <!-- Steps -->
-        <o-field label="Steps" :message="errors.stepsCollection">
+        <o-field label="Steps" :message="errors.stepsCollection"
+                 :variant="variant(errors.stepsCollection as string)">
             <StepsGrid
+                ref="stepGrid"
                 :loading="loading"
                 :steps="recipe.steps"
                 :stepErrors="errors?.steps"
@@ -40,6 +43,7 @@
         <!-- Media -->
         <o-field label="Media" :message="errors.mediaUrlsCollection">
             <MediaUrlsGrid
+                ref="mediaUrlGrid"
                 :loading="loading"
                 :media-urls="recipe.mediaUrls"
                 :media-url-errors="errors.mediaUrls"
@@ -59,15 +63,13 @@
 </template>
 
 <script lang="ts">
-    import {Component, Emit, Prop, Vue, Watch} from "vue-facing-decorator";
-    import {type IRecipe} from "@/api";
+    import {Component, Emit, Prop, Ref, Vue, Watch} from "vue-facing-decorator";
     import IngredientsGrid from "@/components/IngredientsGrid.vue";
     import MediaUrlsGrid from "@/components/MediaUrlsGrid.vue";
     import StepsGrid from "@/components/StepsGrid.vue";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import type {IMediaUrlParams} from "@/components/params/IMediaUrlParams";
     import {nameof} from "@/utils/Helpers";
-    import {RecipeToRecipeUpdateParamsConverter} from "@/components/converters/RecipeToRecipeUpdateParamsConverter";
     import Fraction from "fraction.js";
 
     @Component({
@@ -85,6 +87,18 @@
 
         @Prop()
         public readonly apiErrors!: Record<string, {description: string}>;
+
+        @Ref
+        public readonly ingredientGrid!: IngredientsGrid;
+
+        @Ref
+        public readonly stepGrid!: StepsGrid;
+
+        @Ref
+        public readonly mediaUrlGrid!: MediaUrlsGrid;
+
+        @Ref
+        public readonly recipeName!: HTMLElement;
 
         public errors: IErrors = {};
 
@@ -138,12 +152,17 @@
             });
         }
 
+        mounted() {
+            this.recipeName.focus();
+        }
+
         public variant(msg?: string) {
             return msg ? "danger" : "";
         }
 
         public addIngredient() {
             this.recipe.ingredients.push({});
+            this.ingredientGrid.focusLastRowInput();
         }
 
         public removeIngredient(index: number) {
@@ -152,6 +171,7 @@
 
         public addStep() {
             this.recipe.steps.push({});
+            this.stepGrid.focusLastRowInput();
         }
 
         public removeStep(index: number) {
@@ -160,6 +180,7 @@
 
         public addMedia(media: IMediaUrlParams | null) {
             this.recipe.mediaUrls.push(media || {});
+            this.mediaUrlGrid.focusLastRowInput();
         }
 
         public removeMedia(index: number) {
