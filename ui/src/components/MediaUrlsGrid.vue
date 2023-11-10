@@ -33,7 +33,7 @@
                     drag-drop
                     placeholder="Upload from Device"
                     accept="image/*,video/*"
-                    @update:model-value="handleFileChange(files)"
+                    @update:model-value="handleFileChange()"
                 >
                     <section class="has-text-centered">
                         <span><o-icon icon="upload" size="is-small" /></span>
