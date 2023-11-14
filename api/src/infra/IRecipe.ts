@@ -2,9 +2,11 @@ import {IIngredient} from "./IIngredient";
 import {IStep} from "./IStep";
 import {IMediaUrl} from "./IMediaUrl";
 import {IAuditDates} from "./IAuditDates";
+import {LocalesEnum} from "./LocalesEnum";
 
 export interface IRecipe extends IAuditDates{
     id: string;
+    locale: LocalesEnum;
     name: string;
     /**
      * The source of the recipe, like a URL from where it was imported

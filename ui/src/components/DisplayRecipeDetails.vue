@@ -1,51 +1,60 @@
 <template>
     <div class="content">
         <div class="card">
-            <header class="card-header is-shadowless">
-                <h1 class="card-header-title">{{ recipe.name }}</h1>
+            <header class="card-header is-shadowless is-flex">
+                <div class="card-header-title">
+                    <div class="card-header-icon is-flex-grow-1 is-justify-content-flex-end">
+                        <KeepScreenOnSwitcher v-if="!hideActions" class="is-size-3-touch is-size-4-tablet is-size-6-fullhd"/>
 
-                <KeepScreenOnSwitcher v-if="!hideActions" />
-                <o-field v-if="!hideActions" class="card-header-icon">
-                    <o-button icon-left="pencil" variant="secondary" @click="editRecipe" title="Edit"></o-button>
-                    <o-button icon-left="trash" variant="danger" @click="deleteRecipe" title="Delete"></o-button>
-                </o-field>
+                        <o-dropdown aria-role="list" class="is-right is-size-3-touch is-size-4-tablet is-size-6-fullhd">
+                            <template #trigger="{ active }">
+                                <o-button
+                                    :icon-right="active ? 'caret-up' : 'caret-down'" />
+                            </template>
+
+                            <o-dropdown-item aria-role="listitem">
+                                <div class="media has-text-info is-size-3-touch is-size-4-tablet is-size-6-fullhd">
+                                    <o-icon class="media-left" icon="pencil" />
+                                    <div class="media-content" @click="editRecipe">Edit</div>
+                                </div>
+                            </o-dropdown-item>
+                            <o-dropdown-item aria-role="listitem">
+                                <div class="media has-text-danger is-size-3-touch is-size-4-tablet is-size-6-fullhd">
+                                    <o-icon class="media-left" icon="trash" />
+                                    <div class="media-content" @click="deleteRecipe">Delete</div>
+                                </div>
+                            </o-dropdown-item>
+                        </o-dropdown>
+                    </div>
+                </div>
             </header>
 
             <div class="card-content">
+                <h1>{{ recipe.name }}</h1>
+
                 <Gallery v-if="recipe.mediaUrls?.length" :items="recipe.mediaUrls"/>
 
-<!--                <article class="media">-->
-<!--                    <div class="media-centered">-->
-<!--                        <div v-if="!recipe.mediaUrls.length">-->
-<!--                            <figure class="image">-->
-<!--                                <img src="../assets/recipe-placeholder.png" alt="Recipe image placeholder" />-->
-<!--                            </figure>-->
-<!--                        </div>-->
-<!--                        <div v-for="media in recipe.mediaUrls" :key="media.url">-->
-<!--                            <figure class="image">-->
-<!--                                <img v-if="isImage(media)" :src="media.url" :alt="'Image of ' + recipe.name">-->
-<!--                                <video v-else-if="isVideo(media)" controls>-->
-<!--                                    <source :src="media.url" type="video/mp4">-->
-<!--                                </video>-->
-<!--                                <a v-else :href="media.url">{{ media.url }}</a>-->
-<!--                            </figure>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </article>-->
+                <p class="is-size-4-touch is-size-5-tablet is-size-6-fullhd">{{ recipe.description }}</p>
 
-                <p class="">{{ recipe.description }}</p>
+                <div class="columns">
+                    <div class="column has-vertical-separator is-size-4-touch is-size-5-tablet is-size-6-fullhd">
+                        <h4 class="subtitle">Ingredients</h4>
+                        <ul>
+                            <li v-for="ingredient in recipe.ingredients" :key="ingredient.item">
+                                {{ ingredient.item }} - <strong>{{ toFraction(ingredient.quantity) }} {{ unitLabel(ingredient.unit) }}</strong>
+                            </li>
+                        </ul>
+                    </div>
 
-                <h4 class="subtitle">Ingredients</h4>
-                <ul>
-                    <li v-for="ingredient in recipe.ingredients" :key="ingredient.item">
-                        {{ toFraction(ingredient.quantity) }} {{ ingredient.unit }} of {{ ingredient.item }}
-                    </li>
-                </ul>
-
-                <h4 class="subtitle">Instructions</h4>
-                <ol>
-                    <li v-for="step in recipe.steps" :key="step.instructions">{{ step.instructions }}</li>
-                </ol>
+                    <div class="column is-two-thirds is-size-3-touch is-size-4-tablet is-size-6-fullhd">
+                        <h4 class="subtitle">Instructions</h4>
+                        <ol>
+                            <li v-for="step in recipe.steps" :key="step.instructions" class="has-horizontal-separator">
+                                {{ step.instructions }}
+                            </li>
+                        </ol>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -54,35 +63,36 @@
 <script lang="ts">
     import {Component, Emit, Prop, Vue} from "vue-facing-decorator";
     import type {IRecipe} from "@/api";
-    import {IMediaUrl} from "@/api";
+    import {LocalesEnum, UnitsEnum} from "@/api";
     import KeepScreenOnSwitcher from "@/components/KeepScreenOnSwitcher.vue";
     import Gallery from "@/components/Gallery.vue";
     import {NumberUtils} from "@/utils/NumberUtils";
-    import PlaceholderImage from "@/assets/recipe-placeholder.png";
+    import {unitsList} from "@/components/UnitsList";
+    import {useAuthStore} from "@/stores/AuthStore";
 
     @Component({
         components: {Gallery, KeepScreenOnSwitcher}
     })
     export default class DisplayRecipeDetails extends Vue {
+        private readonly authStore = useAuthStore();
+
         @Prop()
         public recipe!: IRecipe;
 
         @Prop({default: false})
         public hideActions!: boolean;
 
-        public get mediaItems() {
-            return this.recipe?.mediaUrls?.length ? this.recipe.mediaUrls : [{
-                url: PlaceholderImage,
-                displayName: "No images"
-            }];
+        public get isMine(): boolean {
+            return this.authStore.sub === this.recipe.createdBy;
         }
 
-        public isImage(media: IMediaUrl): boolean {
-            return media?.type === IMediaUrl.type.IMAGE;
-        }
-
-        public isVideo(media: IMediaUrl): boolean {
-            return media?.type === IMediaUrl.type.VIDEO;
+        public unitLabel(unit: string) {
+            if (!Object.values(UnitsEnum).includes(unit as UnitsEnum)) {
+                return "";
+            }
+            const localeName = (this.recipe.locale && this.recipe.locale !== LocalesEnum.UNSUPPORTED) ?
+                this.recipe.locale : LocalesEnum.EN_US;
+            return unitsList.find(u => u.value === unit)?.label[localeName] || "";
         }
 
         @Emit("edit")
@@ -95,34 +105,12 @@
             return this.recipe.id;
         }
 
-        public toFraction(quantity: number) {
-            return NumberUtils.toFraction(quantity);
+        public toFraction(quantity: number | null) {
+            return quantity ? NumberUtils.toFraction(quantity) : "";
         }
     }
 </script>
 
 <style scoped>
-/*
-.media .image {
-    max-height: 200px;
-    max-width: 200px;
-    overflow: hidden;    !* Ensures media doesn't spill out of the container *!
-    display: flex;       !* Centers the child elements (img or video) *!
-    justify-content: center;
-    align-items: center;
-}
-.media .image img, .media .image video {
-    !*max-height: 200px;*!
-    margin: 10px;
-    min-width: 100%;
-    min-height: 100%;
-    max-width: unset;
-    max-height: unset;
-    object-fit: contain;   !* Ensures media scales properly and maintains aspect ratio *!
-}
-.media-centered {
-    margin-left: auto;
-    margin-right: auto;
-}
-*/
+
 </style>

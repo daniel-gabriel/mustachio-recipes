@@ -3,8 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
+import type { UnitsEnum } from './UnitsEnum';
+
 export type IIngredient = {
     item: string;
-    quantity: number;
-    unit: string;
+    quantity: number | null;
+    unit: UnitsEnum;
 };

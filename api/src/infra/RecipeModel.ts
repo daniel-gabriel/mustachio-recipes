@@ -1,8 +1,11 @@
 import { Document, model } from "mongoose";
 import {IAuditDates} from "./IAuditDates";
 import DbHelper from "./DbHelper";
+import {LocalesEnum} from "./LocalesEnum";
+import {UnitsEnum} from "./UnitsEnum";
 
 export interface IRecipeModel extends IAuditDates {
+    locale: LocalesEnum;
     createdBy: string;
     name: string;
     description: string;
@@ -15,7 +18,7 @@ export interface IRecipeModel extends IAuditDates {
 
 interface IIngredientModel {
     item: string;
-    quantity: number;
+    quantity: number | null;
     unit: string;
 }
 
@@ -33,8 +36,14 @@ export interface IRecipeDoc extends IRecipeModel, Document {}
 
 const ingredientSchema = DbHelper.MakeSchema<IIngredientModel>({
     item: String,
-    quantity: Number,
-    unit: String
+    quantity: {
+        type: Number,
+        default: null
+    },
+    unit: {
+        type: String,
+        enum: UnitsEnum
+    }
 });
 
 const stepSchema = DbHelper.MakeSchema<IStepModel>({
@@ -48,6 +57,10 @@ const mediaUrlSchema = DbHelper.MakeSchema<IMediaUrlModel>({
 });
 
 const recipeSchema = DbHelper.MakeSchema<IRecipeModel>({
+    locale: {
+        type: String,
+        enum: Object.values(LocalesEnum)
+    },
     createdBy: String,
     name: String,
     description: String,

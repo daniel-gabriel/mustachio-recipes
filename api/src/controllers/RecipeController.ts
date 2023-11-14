@@ -1,4 +1,18 @@
-import {Body, Controller, Request, Delete, Get, Path, Post, Put, Query, Route, Security, Tags, UploadedFile} from "tsoa";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Path,
+    Post,
+    Put,
+    Query,
+    Request,
+    Route,
+    Security,
+    Tags,
+    UploadedFile
+} from "tsoa";
 import {IRecipeRepository} from "../infra/IRecipeRepository";
 import {IRecipe} from "../infra/IRecipe";
 import {inject, injectable} from "tsyringe";
@@ -12,6 +26,10 @@ import {IPrincipal} from "../startup/auth/IPrincipal";
 import {IGroupRepository} from "../infra/IGroupRepository";
 import {IUserRepository} from "../infra/IUserRepository";
 import {IRecipeStats} from "../infra/IRecipeStats";
+import {nameof} from "../utils/Helpers";
+import {LocalesEnum} from "../infra/LocalesEnum";
+import {UnitsEnum} from "../infra/UnitsEnum";
+import {IIngredient} from "../infra/IIngredient";
 
 @injectable()
 @Route("recipes")
@@ -61,7 +79,79 @@ export class RecipeController extends Controller {
 
     @Post()
     public async createRecipe(@Request() request: { user: IPrincipal; }, @Body() recipe: IUpdateRecipe): Promise<IRecipe> {
+        this.validateRecipe(recipe);
+
         return this.recipeRepository.create(request.user.subId, recipe);
+    }
+
+    private validateRecipe(recipe: IUpdateRecipe): void {
+        if (!recipe.locale) {
+            throw new ValidationError(nameof<IUpdateRecipe>("locale"),
+                "Locale is required", "updateRecipe.localeEmpty");
+        }
+        const supportedLocales: string[] = Object.values(LocalesEnum);
+        if (!supportedLocales.includes(recipe.locale)) {
+            throw new ValidationError(nameof<IUpdateRecipe>("locale"),
+                `Locale ${recipe.locale} is not supported. Only ${JSON.stringify(supportedLocales)} are supported.`,
+                "updateRecipe.localeUnsupported");
+        }
+        if (!recipe.name) {
+            throw new ValidationError(nameof<IUpdateRecipe>("name"),
+                "Name is required", "updateRecipe.nameEmpty");
+        }
+
+        if (!recipe.description) {
+            throw new ValidationError(nameof<IUpdateRecipe>("description"),
+                "Description is required", "updateRecipe.descriptionEmpty");
+        }
+
+        if (!recipe.ingredients?.length) {
+            throw new ValidationError(nameof<IUpdateRecipe>("ingredients"),
+                "At least 1 ingredient is required", "updateRecipe.ingredientsEmpty");
+        } else {
+            recipe.ingredients.forEach((ing, i) => {
+                if (!ing.item || !ing.unit) {
+                    throw new ValidationError(
+                        `${nameof<IUpdateRecipe>("ingredients")}[${i}]`,
+                        "The name, valid quantity, and a unit of measure are required for each ingredient.",
+                        `updateRecipe.ingredient[${i}].propEmpty`);
+                }
+                if (!Object.values(UnitsEnum).includes(ing.unit)) {
+                    throw new ValidationError(
+                        `${nameof<IUpdateRecipe>("ingredients")}[${i}].${nameof<IIngredient>("unit")}`,
+                        `Units must be one of the following: ${JSON.stringify(UnitsEnum)}`,
+                        `updateRecipe.ingredient[${i}].unitInvalid`);
+                }
+                if (ing.unit !== UnitsEnum.ToTaste && (ing.quantity === null || isNaN(ing.quantity))) {
+                    throw new ValidationError(
+                        `${nameof<IUpdateRecipe>("ingredients")}[${i}].${nameof<IIngredient>("quantity")}`,
+                        "The quantity must be a number",
+                        `updateRecipe.ingredient[${i}].quantityNotANumber`);
+                }
+            });
+        }
+
+        if (!recipe.steps?.length) {
+            throw new ValidationError(nameof<IUpdateRecipe>("steps"),
+                "At least 1 step is required",
+                "updateRecipe.stepsEmpty");
+        } else {
+            recipe.steps.forEach((s, i) => {
+                if (!s.instructions) {
+                    throw new ValidationError(`${nameof<IUpdateRecipe>("name")}[${i}]`,
+                        "Every instruction step is required to have some text.",
+                        `updateRecipe.steps[${i}].stepEmpty`);
+                }
+            });
+        }
+
+        recipe.mediaUrls?.forEach((s, i) => {
+            if (!s.url) {
+                throw new ValidationError(`${nameof<IUpdateRecipe>("name")}[${i}]`,
+                    "Every image or video is required to have an image or video URL, or be an attached file.",
+                    `updateRecipe.mediaUrls[${i}].urlEmpty`);
+            }
+        });
     }
 
     @Put("{id}")
@@ -70,6 +160,7 @@ export class RecipeController extends Controller {
         if (recipe?.createdBy !== request.user.subId) {
             throw new PermissionError(`Recipe with ID ${id} does not belong to you, so you cannot edit it.`);
         }
+        this.validateRecipe(updatedRecipe);
         return this.recipeRepository.update(request.user.subId, id, updatedRecipe);
     }
 

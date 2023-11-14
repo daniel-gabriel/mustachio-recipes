@@ -6,11 +6,13 @@
 import type { IIngredient } from './IIngredient';
 import type { IMediaUrl } from './IMediaUrl';
 import type { IStep } from './IStep';
+import type { LocalesEnum } from './LocalesEnum';
 
 export type IRecipe = {
     createdOn: string;
     lastUpdatedOn: string;
     id: string;
+    locale: LocalesEnum;
     name: string;
     /**
      * The source of the recipe, like a URL from where it was imported

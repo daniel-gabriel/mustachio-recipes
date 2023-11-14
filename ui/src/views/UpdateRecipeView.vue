@@ -13,7 +13,7 @@
 
 <script lang="ts">
     import {Component, Inject, Vue} from "vue-facing-decorator";
-    import {ApiService} from "@/api";
+    import {ApiService, LocalesEnum} from "@/api";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import {useAlertStore} from "@/stores/AlertStore";
     import EditRecipe from "@/components/EditRecipe.vue";
@@ -29,6 +29,7 @@
         public apiErrors: Record<string, unknown> = {};
 
         public recipe: IRecipeUpdateParams = {
+            locale: LocalesEnum.EN_US,
             name: "",
             description: "",
             ingredients: [],

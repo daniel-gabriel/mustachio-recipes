@@ -1,9 +1,20 @@
 <template>
     <div>
         <!-- General info -->
-        <o-field label="Name" :message="errors.name" :variant="variant(errors.name as string)">
-            <o-input ref="recipeName" :disabled="loading" v-model="recipe.name" placeholder="Enter recipe name"></o-input>
-        </o-field>
+        <div class="columns">
+            <div class="column">
+                <o-field label="Name" :message="errors.name" :variant="variant(errors.name as string)">
+                    <o-input ref="recipeName" :disabled="loading" v-model="recipe.name" placeholder="Enter recipe name"></o-input>
+                </o-field>
+            </div>
+            <div class="column is-narrow">
+                <o-field label="Recipe Language" :message="errors.locale" :variant="variant(errors.locale as string)">
+                    <o-select v-model="recipe.locale" placeholder="Language">
+                        <option v-for="locale in localesList" :value="locale.value">{{ label(locale) }}</option>
+                    </o-select>
+                </o-field>
+            </div>
+        </div>
 
         <o-field label="Description" :message="errors.description" :variant="variant(errors.description as string)">
             <o-input :disabled="loading" v-model="recipe.description" type="textarea" placeholder="Enter recipe description"></o-input>
@@ -19,6 +30,7 @@
                  :variant="variant(errors.ingredientsCollection as string)">
             <IngredientsGrid
                 ref="ingredientGrid"
+                :locale="recipe.locale"
                 :loading="loading"
                 :ingredients="recipe.ingredients"
                 :ingredientErrors="errors?.ingredients"
@@ -71,6 +83,8 @@
     import type {IMediaUrlParams} from "@/components/params/IMediaUrlParams";
     import {nameof} from "@/utils/Helpers";
     import Fraction from "fraction.js";
+    import {LocalesEnum, UnitsEnum} from "@/api";
+    import {type ILocale, localesList} from "@/components/LocalesList";
 
     @Component({
         components: {StepsGrid, MediaUrlsGrid, IngredientsGrid}
@@ -100,15 +114,19 @@
         @Ref
         public readonly recipeName!: HTMLElement;
 
+        public localesList = localesList;
+
         public errors: IErrors = {};
 
         public recipe: IRecipeUpdateParams = {
+            locale: LocalesEnum.EN_US,
             name: "",
             description: "",
             ingredients: [],
             steps: [],
             mediaUrls: []
         };
+
 
         @Watch("importedRecipe")
         public onImportedRecipe() {
@@ -158,6 +176,12 @@
 
         public variant(msg?: string) {
             return msg ? "danger" : "";
+        }
+
+        public label(locale: ILocale): string {
+            const localeName = (this.recipe.locale && this.recipe.locale !== LocalesEnum.UNSUPPORTED) ?
+                this.recipe.locale : LocalesEnum.EN_US;
+            return locale.label[localeName];
         }
 
         public addIngredient() {
@@ -222,12 +246,12 @@
                 hasErrors = true;
             } else {
                 this.recipe.ingredients.forEach((ing, i) => {
-                    if (!ing.item || !ing.unit || !ing.quantity) {
+                    if (!ing.item || !ing.unit) {
                         this.errors.ingredients![i] =
                             "The name, valid quantity, and a unit of measure are required for each ingredient.";
                         hasErrors = true;
                     }
-                    if (!this.isNumberOrFraction(ing.quantity)) {
+                    if (ing.unit !== UnitsEnum.TO_TASTE && !this.isNumberOrFraction(ing.quantity)) {
                         this.errors.ingredients![i] = "The quantity must be a number - whole, decimal or fraction";
                         hasErrors = true;
                     }
@@ -267,6 +291,7 @@
     }
 
     interface IErrors {
+        locale?: string;
         name?: string;
         description?: string;
         additionalNotes?: string;

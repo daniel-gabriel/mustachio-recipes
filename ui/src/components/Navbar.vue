@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div v-if="!authStore.isLoggedIn" class="navbar-item">
-                    <google-sign-in-button class="navbar-item" @clicked="signIn('google')"/>
+                    <google-sign-in-button class="navbar-item" width="auto" @clicked="signIn('google')"/>
                 </div>
             </div>
         </div>

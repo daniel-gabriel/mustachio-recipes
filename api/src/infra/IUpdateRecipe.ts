@@ -1,8 +1,10 @@
 import {IIngredient} from "./IIngredient";
 import {IStep} from "./IStep";
 import {IMediaUrl} from "./IMediaUrl";
+import {LocalesEnum} from "./LocalesEnum";
 
 export interface IUpdateRecipe {
+    locale: LocalesEnum;
     name: string;
     /**
      * The source of the recipe, like a URL from where it was imported

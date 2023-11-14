@@ -25,7 +25,7 @@
 
 <script lang="ts">
     import {Component, Inject, Vue} from "vue-facing-decorator";
-    import {ApiService, type IRecipe} from "@/api";
+    import {ApiService, LocalesEnum} from "@/api";
     import EditRecipe from "@/components/EditRecipe.vue";
     import type {IRecipeUpdateParams} from "@/components/params/IRecipeUpdateParams";
     import ImportModal from "@/components/ImportModal.vue";
@@ -46,6 +46,7 @@
         public showImportModal = false;
         public apiErrors: Record<string, unknown> = {};
         public recipe: IRecipeUpdateParams = {
+            locale: LocalesEnum.EN_US,
             name: "",
             description: "",
             ingredients: [],

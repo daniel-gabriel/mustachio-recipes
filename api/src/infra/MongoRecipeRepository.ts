@@ -96,6 +96,7 @@ export class MongoRecipeRepository implements IRecipeRepository {
     public async create(userSubId: string, recipe: IUpdateRecipe): Promise<IRecipe> {
         const newRecipe = new RecipeModel(<IRecipeModel> {
             createdBy: userSubId,
+            locale: recipe.locale,
             description: recipe.description,
             name: recipe.name,
             source: recipe.source,
@@ -149,6 +150,7 @@ export class MongoRecipeRepository implements IRecipeRepository {
     private toExternalModel(recipe: IRecipeDoc): IRecipe {
         return {
             id: recipe._id.toString(),
+            locale: recipe.locale,
             description: recipe.description,
             name: recipe.name,
             source: recipe.source,
@@ -175,6 +177,7 @@ export class MongoRecipeRepository implements IRecipeRepository {
     private toDbModel(createdBy: string, recipe: IUpdateRecipe): IRecipeModel {
         return {
             createdBy,
+            locale: recipe.locale,
             description: recipe.description,
             name: recipe.name,
             source: recipe.source,

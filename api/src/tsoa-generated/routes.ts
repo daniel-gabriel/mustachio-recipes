@@ -17,11 +17,16 @@ const upload = multer();
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "LocalesEnum": {
+        "dataType": "refEnum",
+        "enums": ["en-US","ru-RU","unsupported"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IIngredient": {
         "dataType": "refObject",
         "properties": {
             "item": {"dataType":"string","required":true},
-            "quantity": {"dataType":"double","required":true},
+            "quantity": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
             "unit": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
@@ -51,6 +56,7 @@ const models: TsoaRoute.Models = {
             "createdOn": {"dataType":"datetime","required":true},
             "lastUpdatedOn": {"dataType":"datetime","required":true},
             "id": {"dataType":"string","required":true},
+            "locale": {"ref":"LocalesEnum","required":true},
             "name": {"dataType":"string","required":true},
             "source": {"dataType":"string"},
             "description": {"dataType":"string","required":true},
@@ -59,6 +65,7 @@ const models: TsoaRoute.Models = {
             "steps": {"dataType":"array","array":{"dataType":"refObject","ref":"IStep"},"required":true},
             "mediaUrls": {"dataType":"array","array":{"dataType":"refObject","ref":"IMediaUrl"},"required":true},
             "createdBy": {"dataType":"string","required":true},
+            "owningUser": {"dataType":"nestedObjectLiteral","nestedProperties":{"name":{"dataType":"string","required":true}}},
         },
         "additionalProperties": false,
     },
@@ -75,9 +82,19 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IRecipeStats": {
+        "dataType": "refObject",
+        "properties": {
+            "myRecipesCount": {"dataType":"double","required":true},
+            "friendsRecipesCount": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IUpdateRecipe": {
         "dataType": "refObject",
         "properties": {
+            "locale": {"ref":"LocalesEnum","required":true},
             "name": {"dataType":"string","required":true},
             "source": {"dataType":"string"},
             "description": {"dataType":"string","required":true},
@@ -134,6 +151,37 @@ export function RegisterRoutes(app: Router) {
 
 
               const promise = controller.getRecipes.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/recipes/stats',
+            authenticateMiddleware([{"Bearer":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(RecipeController)),
+            ...(fetchMiddlewares<RequestHandler>(RecipeController.prototype.getStats)),
+
+            async function RecipeController_getStats(request: any, response: any, next: any) {
+            const args = {
+                    request: {"in":"request","name":"request","required":true,"dataType":"object"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<RecipeController>(RecipeController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getStats.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

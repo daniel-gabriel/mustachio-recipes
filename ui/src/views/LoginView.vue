@@ -46,8 +46,4 @@
 </script>
 
 <style scoped>
-.has-vertical-separator {
-    border-right: 1px solid;
-    border-right-color: var(--color-border-disabled);
-}
 </style>

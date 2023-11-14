@@ -18,5 +18,7 @@ export type { IRecipeStats } from './models/IRecipeStats';
 export type { IStep } from './models/IStep';
 export type { ITextParseRequest } from './models/ITextParseRequest';
 export type { IUpdateRecipe } from './models/IUpdateRecipe';
+export { LocalesEnum } from './models/LocalesEnum';
+export { UnitsEnum } from './models/UnitsEnum';
 
 export { RecipesService } from './services/RecipesService';

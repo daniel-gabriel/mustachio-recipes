@@ -6,6 +6,14 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"LocalesEnum": {
+				"enum": [
+					"en-US",
+					"ru-RU",
+					"unsupported"
+				],
+				"type": "string"
+			},
 			"IIngredient": {
 				"properties": {
 					"item": {
@@ -13,7 +21,8 @@
 					},
 					"quantity": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"nullable": true
 					},
 					"unit": {
 						"type": "string"
@@ -74,6 +83,9 @@
 					"id": {
 						"type": "string"
 					},
+					"locale": {
+						"$ref": "#/components/schemas/LocalesEnum"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -108,12 +120,24 @@
 					},
 					"createdBy": {
 						"type": "string"
+					},
+					"owningUser": {
+						"properties": {
+							"name": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"name"
+						],
+						"type": "object"
 					}
 				},
 				"required": [
 					"createdOn",
 					"lastUpdatedOn",
 					"id",
+					"locale",
 					"name",
 					"description",
 					"ingredients",
@@ -159,8 +183,29 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"IRecipeStats": {
+				"properties": {
+					"myRecipesCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"friendsRecipesCount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"myRecipesCount",
+					"friendsRecipesCount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"IUpdateRecipe": {
 				"properties": {
+					"locale": {
+						"$ref": "#/components/schemas/LocalesEnum"
+					},
 					"name": {
 						"type": "string"
 					},
@@ -195,6 +240,7 @@
 					}
 				},
 				"required": [
+					"locale",
 					"name",
 					"description",
 					"ingredients",
@@ -315,6 +361,32 @@
 						}
 					}
 				}
+			}
+		},
+		"/recipes/stats": {
+			"get": {
+				"operationId": "GetStats",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IRecipeStats"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Recipes"
+				],
+				"security": [
+					{
+						"Bearer": []
+					}
+				],
+				"parameters": []
 			}
 		},
 		"/recipes/{id}": {
