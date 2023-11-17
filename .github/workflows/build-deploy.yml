@@ -259,6 +259,15 @@ jobs:
           echo "FIREBASE_CLIENT_ID=$FIREBASE_CLIENT_ID" >> $envPath
           echo "FIREBASE_CLIENT_X509_CERT_URL=$FIREBASE_CLIENT_X509_CERT_URL" >> $envPath
 
+      - name: Create .env file for Mongo
+        env:
+          MONGO_ADMIN_USERNAME: "${{ secrets.MONGO_ADMIN_USERNAME_PROD }}"
+          MONGO_ADMIN_PASSWORD: "${{ secrets.MONGO_ADMIN_PASSWORD_PROD }}"
+        run: |
+          envPath="./.env.mongo"
+          echo "MONGO_INITDB_ROOT_USERNAME=$MONGO_ADMIN_USERNAME" >> $envPath
+          echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_ADMIN_PASSWORD" >> $envPath
+
       - name: Deploy to Digital Ocean
         env:
           DROPLET_PRIVATE_KEY: ${{ secrets.DIGITAL_OCEAN_DROPLET_SSH_PRIVATE_KEY_PROD }}
@@ -274,6 +283,7 @@ jobs:
           cp ./docker/docker-compose.prod.yml ./docker-deploy/
           cp ./.env.api ./docker-deploy/
           cp ./.env.ui ./docker-deploy/
+          cp ./.env.mongo ./docker-deploy/
           
           # copy docker-compose to the droplet
           rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" ./docker-deploy/ "$DROPLET_USER@$DROPLET_ADDRESS:/opt/mustachio"
