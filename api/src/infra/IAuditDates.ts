@@ -1,7 +1,13 @@
 /**
- * Audit dates interface. Used on db entities to mark them with having timestamps.
+ * Timestamps for creation and update of an entity.
  */
 export interface IAuditDates {
+    /**
+     * The date when the entity was created.
+     */
     createdOn: Date;
+    /**
+     * The date when the entity was updated.
+     */
     lastUpdatedOn: Date;
 }

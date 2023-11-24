@@ -61,7 +61,30 @@ export function initRouter(authService: AuthService): Router {
                 meta: {
                     requiresAuth: true
                 }
+            },
+            {
+                path: "/privacy-policy",
+                name: "PrivacyPolicy",
+                // route level code-splitting
+                // this generates a separate chunk (About.[hash].js) for this route
+                // which is lazy-loaded when the route is visited.
+                component: () => import("../views/PrivacyPolicyView.vue"),
+                meta: {
+                    requiresAuth: false
+                }
+            },
+            {
+                path: "/terms-of-service",
+                name: "TermsOfService",
+                // route level code-splitting
+                // this generates a separate chunk (About.[hash].js) for this route
+                // which is lazy-loaded when the route is visited.
+                component: () => import("../views/TermsOfServiceView.vue"),
+                meta: {
+                    requiresAuth: false
+                }
             }
+
         ]
     });
 

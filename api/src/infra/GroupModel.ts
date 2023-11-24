@@ -1,14 +1,14 @@
 import { Document, model } from "mongoose";
-import {IAuditDates} from "./IAuditDates";
+import {IAuditDatesModel} from "./IAuditDatesModel";
 import DbHelper from "./DbHelper";
 
-export interface IGroupModel extends IAuditDates {
+export interface IGroupModel extends IAuditDatesModel {
     owner: string;
     name: string;
     members: IMemberModel[];
 }
 
-export interface IMemberModel extends IAuditDates {
+export interface IMemberModel extends IAuditDatesModel {
     subId: string;
 }
 

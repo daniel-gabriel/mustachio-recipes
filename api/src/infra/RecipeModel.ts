@@ -1,10 +1,10 @@
 import { Document, model } from "mongoose";
-import {IAuditDates} from "./IAuditDates";
+import {IAuditDatesModel} from "./IAuditDatesModel";
 import DbHelper from "./DbHelper";
 import {LocalesEnum} from "./LocalesEnum";
 import {UnitsEnum} from "./UnitsEnum";
 
-export interface IRecipeModel extends IAuditDates {
+export interface IRecipeModel extends IAuditDatesModel {
     locale: LocalesEnum;
     createdBy: string;
     name: string;

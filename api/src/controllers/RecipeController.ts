@@ -45,6 +45,13 @@ export class RecipeController extends Controller {
         super();
     }
 
+    /**
+     * Searches and returns recipes that belong to the logged-in user, as well as their friends - users listed in the
+     * logged-in user's "default" group, sorted by created date in descending order.
+     * @param request Contains the logged-in user's principal.
+     * @param pageIndex The 0-based index of the page to return. Default is 0.
+     * @param pageSize The size of the page. Default is 10.
+     */
     @Get()
     public async getRecipes(
         @Request() request: { user: IPrincipal; },
@@ -54,6 +61,11 @@ export class RecipeController extends Controller {
         return this.recipeRepository.getAll(request.user.subId, pageIndex, pageSize);
     }
 
+    /**
+     * Returns the logged-in user's statistics - how many recipes belong to the user and how many belong to the user's
+     * friends.
+     * @param request Contains the logged-in user's principal.
+     * */
     @Get("stats")
     public async getStats(
         @Request() request: { user: IPrincipal; }
@@ -61,6 +73,12 @@ export class RecipeController extends Controller {
         return this.recipeRepository.getStats(request.user.subId);
     }
 
+    /**
+     * Returns the recipe specified by the `id`. If the recipe doesn't belong to the logged-in user or their friends,
+     * a 404 Not Found is returned to not expose the fact of the existence of the requested recipe.
+     * @param request Contains the logged-in user's principal.
+     * @param id The id of the recipe to retrieve.
+     */
     @Get("{id}")
     public async getRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string): Promise<IRecipe | null> {
         const recipe = await this.recipeRepository.getById(id);
@@ -77,6 +95,13 @@ export class RecipeController extends Controller {
         }
     }
 
+    /**
+     * Creates a new recipe with the logged-in user set as the owner. If any of the recipe's parameters are not valid,
+     * a 400 Bad Request is returned, with the error information in the format of Problem-Json
+     * (https://datatracker.ietf.org/doc/html/rfc7807).
+     * @param request Contains the logged-in user's principal.
+     * @param recipe The recipe to create.
+     */
     @Post()
     public async createRecipe(@Request() request: { user: IPrincipal; }, @Body() recipe: IUpdateRecipe): Promise<IRecipe> {
         this.validateRecipe(recipe);
@@ -154,6 +179,15 @@ export class RecipeController extends Controller {
         });
     }
 
+    /**
+     * Updates an existing recipe specified by the `id`. If any of the recipe's parameters are not valid,
+     * a 400 Bad Request is returned, with the error information in the format of Problem-Json
+     * (https://datatracker.ietf.org/doc/html/rfc7807). If the recipe doesn't belong to the logged-in user, a 403 Forbidden
+     * is returned.
+     * @param request Contains the logged-in user's principal.
+     * @param id The id of the recipe to update.
+     * @param updatedRecipe The updated recipe.
+     */
     @Put("{id}")
     public async updateRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string, @Body() updatedRecipe: IUpdateRecipe): Promise<IRecipe | null> {
         const recipe = await this.recipeRepository.getById(id);
@@ -164,6 +198,12 @@ export class RecipeController extends Controller {
         return this.recipeRepository.update(request.user.subId, id, updatedRecipe);
     }
 
+    /**
+     * Deletes an existing recipe specified by the `id`. If the recipe doesn't belong to the logged-in user, a 403 Forbidden
+     * is returned.
+     * @param request Contains the logged-in user's principal.
+     * @param id The id of the recipe to update.
+     */
     @Delete("{id}")
     public async deleteRecipe(@Request() request: { user: IPrincipal; }, @Path() id: string): Promise<boolean> {
         const recipe = await this.recipeRepository.getById(id);
@@ -173,11 +213,21 @@ export class RecipeController extends Controller {
         return this.recipeRepository.delete(id);
     }
 
+    /**
+     * Parses the specified recipe text using artificial intelligence, and returns as much information as could be
+     * extracted from the text.
+     * @param parseTextRequest The text parameters to parse.
+     */
     @Post("parse-text")
     public async parseText(@Body() parseTextRequest: ITextParseRequest) {
         return await this.recipeToJsonConverter.parseRecipe("text", parseTextRequest.source);
     }
 
+    /**
+     * Parses the specified recipe image using OCR and artificial intelligence, and returns as much information as could be
+     * extracted from the text.
+     * @param image The parameters of the image containing text to parse.
+     */
     @Post("parse-image")
     public async parseImage(@UploadedFile("image") image: IImageParseRequest): Promise<string> {
         if (!image) {
@@ -209,12 +259,30 @@ export class RecipeController extends Controller {
     }
 }
 
+/**
+ * Parameters of parsing the image.
+ */
 interface IImageParseRequest {
+    /**
+     * The image to parse.
+     */
     buffer: Buffer;
+    /**
+     * The mime type of the image.
+     */
     mimetype: string;
+    /**
+     * The original name of the image file - this is used for display purposes.
+     */
     originalName: string;
 }
 
+/**
+ * Parameters of parsing the text.
+ */
 interface ITextParseRequest {
+    /**
+     * The text to parse.
+     */
     source: string
 }

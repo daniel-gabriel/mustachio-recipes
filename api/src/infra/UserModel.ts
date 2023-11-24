@@ -1,8 +1,8 @@
 import { Document, model } from "mongoose";
-import {IAuditDates} from "./IAuditDates";
+import {IAuditDatesModel} from "./IAuditDatesModel";
 import DbHelper from "./DbHelper";
 
-export interface IUserModel extends IAuditDates {
+export interface IUserModel extends IAuditDatesModel {
     subId: string;
     name: string;
     email: string;

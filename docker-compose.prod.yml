@@ -16,6 +16,8 @@ services:
       - .env.ui
     ports:
       - "80:80"
+    depends_on:
+      - api
 
   mongodb:
     image: "mongo:latest"

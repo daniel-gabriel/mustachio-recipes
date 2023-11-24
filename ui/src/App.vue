@@ -7,6 +7,8 @@
         <div class="container">
             <router-view></router-view>
         </div>
+
+        <Footer/>
     </div>
 </template>
 
@@ -14,9 +16,10 @@
     import Navbar from "@/components/Navbar.vue";
     import ToastNotification from "@/components/ToastNotification.vue";
     import {Component, Vue} from "vue-facing-decorator";
+    import Footer from "@/components/Footer.vue";
 
     @Component({
-        components: {ToastNotification, Navbar}
+        components: {ToastNotification, Navbar, Footer}
     })
     export default class App extends Vue {}
 </script>
