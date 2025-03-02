@@ -21,7 +21,7 @@
     "@oruga-ui/oruga-next": "^0.7.0",
     "@oruga-ui/theme-bulma": "^0.2.11",
     "bulma": "^0.9.4",
-    "firebase": "^10.5.2",
+    "firebase": "^11.4.0",
     "fraction.js": "^4.3.7",
     "pinia": "^2.1.6",
     "pinia-plugin-persistedstate": "^3.2.0",
