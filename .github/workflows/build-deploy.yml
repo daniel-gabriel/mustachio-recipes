@@ -92,7 +92,7 @@ jobs:
 
       # Upload the version artefacts
       - name: Publish the docker-compose files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Docker
           path: |
