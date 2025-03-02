@@ -1,5 +1,5 @@
 import { initializeApp, type FirebaseOptions } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInWithRedirect, signOut,
+import { getAuth, onAuthStateChanged, signInWithPopup, signOut,
     type Auth, type User, GoogleAuthProvider } from "firebase/auth";
 
 export class AuthService {
@@ -23,7 +23,7 @@ export class AuthService {
         if (provider !== "google") {
             throw new Error(`Trying to log in with an unsupported provider: ${provider}`);
         }
-        await signInWithRedirect(this.auth, this.googleProvider);
+        await signInWithPopup(this.auth, this.googleProvider);
     }
 
     // Sign out
