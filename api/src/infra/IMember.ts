@@ -1,5 +1,7 @@
 export interface IMember {
-    subId: string,
-    createdOn: Date,
-    lastUpdatedOn: Date
+    subId?: string;
+    invitedSubId?: string;
+    randomCode?: string;
+    createdOn: Date;
+    lastUpdatedOn: Date;
 }

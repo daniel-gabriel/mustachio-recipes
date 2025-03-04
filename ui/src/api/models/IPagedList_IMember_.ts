@@ -3,16 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { IRecipe } from './IRecipe';
+import type { IMember } from './IMember';
 
 /**
  * A generic paged list. The items in the data array are expected to be of type `TItem`.
  */
-export type IPagedList_IRecipe_ = {
+export type IPagedList_IMember_ = {
     /**
      * The array containing one page of data.
      */
-    data: Array<IRecipe>;
+    data: Array<IMember>;
     /**
      * The index of the returned page, 0-based.
      */

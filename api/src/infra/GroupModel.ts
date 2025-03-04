@@ -9,13 +9,17 @@ export interface IGroupModel extends IAuditDatesModel {
 }
 
 export interface IMemberModel extends IAuditDatesModel {
-    subId: string;
+    subId?: string;
+    invitedSubId?: string;
+    randomCode?: string;
 }
 
 export interface IGroupDoc extends IGroupModel, Document {}
 
 const memberSchema = DbHelper.MakeSchema<IMemberModel>({
-    subId: String
+    subId: String,
+    invitedSubId: String,
+    randomCode: String
 });
 
 const groupSchema = DbHelper.MakeSchema<IGroupModel>({

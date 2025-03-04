@@ -6,11 +6,135 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"IMember": {
+				"properties": {
+					"subId": {
+						"type": "string"
+					},
+					"invitedSubId": {
+						"type": "string"
+					},
+					"randomCode": {
+						"type": "string"
+					},
+					"createdOn": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"lastUpdatedOn": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"createdOn",
+					"lastUpdatedOn"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IPagedList_IMember_": {
+				"description": "A generic paged list. The items in the data array are expected to be of type `TItem`.",
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/IMember"
+						},
+						"type": "array",
+						"description": "The array containing one page of data."
+					},
+					"pageIndex": {
+						"type": "number",
+						"format": "double",
+						"description": "The index of the returned page, 0-based."
+					},
+					"pageSize": {
+						"type": "number",
+						"format": "double",
+						"description": "The page size."
+					},
+					"totalItems": {
+						"type": "number",
+						"format": "double",
+						"description": "The total number of items across all pages."
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double",
+						"description": "The total number of pages."
+					}
+				},
+				"required": [
+					"data",
+					"pageIndex",
+					"pageSize",
+					"totalItems",
+					"totalPages"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IGroup": {
+				"properties": {
+					"owner": {
+						"type": "string"
+					},
+					"groupName": {
+						"type": "string"
+					},
+					"members": {
+						"$ref": "#/components/schemas/IPagedList_IMember_"
+					}
+				},
+				"required": [
+					"owner",
+					"groupName",
+					"members"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"LocalesEnum": {
 				"enum": [
 					"en-US",
 					"ru-RU",
 					"unsupported"
+				],
+				"type": "string"
+			},
+			"UnitsEnum": {
+				"enum": [
+					"tsp",
+					"tbsp",
+					"fl oz",
+					"c",
+					"pt",
+					"qt",
+					"gal",
+					"ml",
+					"l",
+					"g",
+					"kg",
+					"oz",
+					"lb",
+					"pinch",
+					"dash",
+					"touch",
+					"handful",
+					"stick",
+					"can",
+					"pkg",
+					"jar",
+					"bottle",
+					"bunch",
+					"slice",
+					"piece",
+					"whole",
+					"half",
+					"quarter",
+					"drop",
+					"cube",
+					"to taste"
 				],
 				"type": "string"
 			},
@@ -25,7 +149,7 @@
 						"nullable": true
 					},
 					"unit": {
-						"type": "string"
+						"$ref": "#/components/schemas/UnitsEnum"
 					}
 				},
 				"required": [
@@ -74,43 +198,51 @@
 				"properties": {
 					"createdOn": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "The date when the entity was created."
 					},
 					"lastUpdatedOn": {
 						"type": "string",
-						"format": "date-time"
+						"format": "date-time",
+						"description": "The date when the entity was updated."
 					},
 					"id": {
-						"type": "string"
+						"type": "string",
+						"description": "The ID of the recipe."
 					},
 					"locale": {
-						"$ref": "#/components/schemas/LocalesEnum"
+						"$ref": "#/components/schemas/LocalesEnum",
+						"description": "The locale of the recipe. Currently only \"en-US\" and \"ru-RU\" are supported."
 					},
 					"name": {
-						"type": "string"
+						"type": "string",
+						"description": "The name of the recipe."
 					},
 					"source": {
 						"type": "string",
-						"description": "The source of the recipe, like a URL from where it was imported"
+						"description": "The source of the recipe, like a URL from where it was imported."
 					},
 					"description": {
-						"type": "string"
+						"type": "string",
+						"description": "The description of the recipe."
 					},
 					"additionalNotes": {
 						"type": "string",
-						"description": "Additional notes about the recipe, like \"put only half of the sugar\" or \"skip the chili pepper if children are eating\""
+						"description": "Additional notes about the recipe, like \"put only half of the sugar\" or \"skip the chili pepper if children are eating\"."
 					},
 					"ingredients": {
 						"items": {
 							"$ref": "#/components/schemas/IIngredient"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "List of ingredients."
 					},
 					"steps": {
 						"items": {
 							"$ref": "#/components/schemas/IStep"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "List of instruction steps."
 					},
 					"mediaUrls": {
 						"items": {
@@ -149,28 +281,34 @@
 				"additionalProperties": false
 			},
 			"IPagedList_IRecipe_": {
+				"description": "A generic paged list. The items in the data array are expected to be of type `TItem`.",
 				"properties": {
 					"data": {
 						"items": {
 							"$ref": "#/components/schemas/IRecipe"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "The array containing one page of data."
 					},
 					"pageIndex": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "The index of the returned page, 0-based."
 					},
 					"pageSize": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "The page size."
 					},
 					"totalItems": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "The total number of items across all pages."
 					},
 					"totalPages": {
 						"type": "number",
-						"format": "double"
+						"format": "double",
+						"description": "The total number of pages."
 					}
 				},
 				"required": [
@@ -251,9 +389,11 @@
 				"additionalProperties": false
 			},
 			"ITextParseRequest": {
+				"description": "Parameters of parsing the text.",
 				"properties": {
 					"source": {
-						"type": "string"
+						"type": "string",
+						"description": "The text to parse."
 					}
 				},
 				"required": [
@@ -282,6 +422,263 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
+		"/groups/{ownerId}/{groupName}": {
+			"get": {
+				"operationId": "GetGroupWithPagedMembers",
+				"responses": {
+					"200": {
+						"description": "A group with its members paged or undefined if not found.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IGroup"
+								}
+							}
+						}
+					}
+				},
+				"description": "Retrieves a group with paged members.",
+				"tags": [
+					"Group"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The ID of the owner of the group.",
+						"in": "path",
+						"name": "ownerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The name of the group.",
+						"in": "path",
+						"name": "groupName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The index of the member page to retrieve.",
+						"in": "query",
+						"name": "memberPageIndex",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "The size of the member page to retrieve.",
+						"in": "query",
+						"name": "memberPageSize",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/groups/{ownerId}/{groupName}/{memberSubId}": {
+			"get": {
+				"operationId": "GetMember",
+				"responses": {
+					"200": {
+						"description": "The requested member or undefined if not found.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IMember"
+								}
+							}
+						}
+					}
+				},
+				"description": "Retrieves a specific member of a group.",
+				"tags": [
+					"Group"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The ID of the owner of the group.",
+						"in": "path",
+						"name": "ownerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The name of the group.",
+						"in": "path",
+						"name": "groupName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the member to retrieve.",
+						"in": "path",
+						"name": "memberSubId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "AddMember",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"description": "Adds a new member to a group.",
+				"tags": [
+					"Group"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The ID of the owner of the group.",
+						"in": "path",
+						"name": "ownerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The name of the group.",
+						"in": "path",
+						"name": "groupName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the member to add.",
+						"in": "path",
+						"name": "memberSubId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The random verification code to ensure this user is allowed to be added.",
+						"in": "query",
+						"name": "randomCode",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteMember",
+				"responses": {
+					"200": {
+						"description": "True if deletion was successful, false otherwise.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"description": "Deletes a member from a group.",
+				"tags": [
+					"Group"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The ID of the owner of the group.",
+						"in": "path",
+						"name": "ownerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The name of the group.",
+						"in": "path",
+						"name": "groupName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the member to delete.",
+						"in": "path",
+						"name": "memberSubId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/groups/invites/{ownerId}/{groupName}/{memberSubId}": {
+			"post": {
+				"operationId": "InviteMember",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"description": "Invite a new member to a group.",
+				"tags": [
+					"Group"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "The ID of the owner of the group.",
+						"in": "path",
+						"name": "ownerId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The name of the group.",
+						"in": "path",
+						"name": "groupName",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the member to add.",
+						"in": "path",
+						"name": "memberSubId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
 		"/recipes": {
 			"get": {
 				"operationId": "GetRecipes",
@@ -297,6 +694,7 @@
 						}
 					}
 				},
+				"description": "Searches and returns recipes that belong to the logged-in user, as well as their friends - users listed in the\r\nlogged-in user's \"default\" group, sorted by created date in descending order.",
 				"tags": [
 					"Recipes"
 				],
@@ -307,6 +705,7 @@
 				],
 				"parameters": [
 					{
+						"description": "The 0-based index of the page to return. Default is 0.",
 						"in": "query",
 						"name": "pageIndex",
 						"required": false,
@@ -317,6 +716,7 @@
 						}
 					},
 					{
+						"description": "The size of the page. Default is 10.",
 						"in": "query",
 						"name": "pageSize",
 						"required": false,
@@ -342,6 +742,7 @@
 						}
 					}
 				},
+				"description": "Creates a new recipe with the logged-in user set as the owner. If any of the recipe's parameters are not valid,\r\na 400 Bad Request is returned, with the error information in the format of Problem-Json\r\n(https://datatracker.ietf.org/doc/html/rfc7807).",
 				"tags": [
 					"Recipes"
 				],
@@ -352,11 +753,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The recipe to create.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IUpdateRecipe"
+								"$ref": "#/components/schemas/IUpdateRecipe",
+								"description": "The recipe to create."
 							}
 						}
 					}
@@ -378,6 +781,7 @@
 						}
 					}
 				},
+				"description": "Returns the logged-in user's statistics - how many recipes belong to the user and how many belong to the user's\r\nfriends.",
 				"tags": [
 					"Recipes"
 				],
@@ -409,6 +813,7 @@
 						}
 					}
 				},
+				"description": "Returns the recipe specified by the `id`. If the recipe doesn't belong to the logged-in user or their friends,\r\na 404 Not Found is returned to not expose the fact of the existence of the requested recipe.",
 				"tags": [
 					"Recipes"
 				],
@@ -419,6 +824,7 @@
 				],
 				"parameters": [
 					{
+						"description": "The id of the recipe to retrieve.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -447,6 +853,7 @@
 						}
 					}
 				},
+				"description": "Updates an existing recipe specified by the `id`. If any of the recipe's parameters are not valid,\r\na 400 Bad Request is returned, with the error information in the format of Problem-Json\r\n(https://datatracker.ietf.org/doc/html/rfc7807). If the recipe doesn't belong to the logged-in user, a 403 Forbidden\r\nis returned.",
 				"tags": [
 					"Recipes"
 				],
@@ -457,6 +864,7 @@
 				],
 				"parameters": [
 					{
+						"description": "The id of the recipe to update.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -466,11 +874,13 @@
 					}
 				],
 				"requestBody": {
+					"description": "The updated recipe.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/IUpdateRecipe"
+								"$ref": "#/components/schemas/IUpdateRecipe",
+								"description": "The updated recipe."
 							}
 						}
 					}
@@ -490,6 +900,7 @@
 						}
 					}
 				},
+				"description": "Deletes an existing recipe specified by the `id`. If the recipe doesn't belong to the logged-in user, a 403 Forbidden\r\nis returned.",
 				"tags": [
 					"Recipes"
 				],
@@ -500,6 +911,7 @@
 				],
 				"parameters": [
 					{
+						"description": "The id of the recipe to update.",
 						"in": "path",
 						"name": "id",
 						"required": true,
@@ -525,6 +937,7 @@
 						}
 					}
 				},
+				"description": "Parses the specified recipe text using artificial intelligence, and returns as much information as could be\r\nextracted from the text.",
 				"tags": [
 					"Recipes"
 				],
@@ -535,11 +948,13 @@
 				],
 				"parameters": [],
 				"requestBody": {
+					"description": "The text parameters to parse.",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ITextParseRequest"
+								"$ref": "#/components/schemas/ITextParseRequest",
+								"description": "The text parameters to parse."
 							}
 						}
 					}
@@ -561,6 +976,7 @@
 						}
 					}
 				},
+				"description": "Parses the specified recipe image using OCR and artificial intelligence, and returns as much information as could be\r\nextracted from the text.",
 				"tags": [
 					"Recipes"
 				],
@@ -579,7 +995,8 @@
 								"properties": {
 									"image": {
 										"type": "string",
-										"format": "binary"
+										"format": "binary",
+										"description": "The parameters of the image containing text to parse."
 									}
 								},
 								"required": [

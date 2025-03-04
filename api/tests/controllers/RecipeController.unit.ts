@@ -3,46 +3,84 @@ import {It, Mock} from "typemoq";
 import {IRecipeRepository} from "../../src/infra/IRecipeRepository";
 import {IRecipe} from "../../src/infra/IRecipe";
 import {IMock} from "typemoq/Api/IMock";
+import {UnitsEnum} from "../../src/infra/UnitsEnum";
+import {LocalesEnum} from "../../src/infra/LocalesEnum";
+import {IRecipeToJsonConverter} from "../../src/services/IRecipeToJsonConverter";
+import {IUserRepository} from "../../src/infra/IUserRepository";
+import {IGroupRepository} from "../../src/infra/IGroupRepository";
+import {IPagedList} from "../../src/infra/IPagedList";
+import {IPrincipal} from "../../src/startup/auth/IPrincipal";
 
 describe("RecipeController", () => {
     let controller: RecipeController;
-    let mockRepo: IMock<IRecipeRepository>;
+    let recipeRepositoryMock: IMock<IRecipeRepository>;
+    let recipeToJsonConverterMock: IMock<IRecipeToJsonConverter>;
+    let groupRepositoryMock: IMock<IGroupRepository>;
+    let userRepositoryMock: IMock<IUserRepository>;
 
     const mockRecipe: IRecipe = {
         id: "1",
+        locale: LocalesEnum["en-US"],
+        createdBy: "a user",
+        createdOn: new Date(),
+        lastUpdatedOn: new Date(),
         name: "Test Recipe",
         description: "Delicious",
-        ingredients: [{item: "Salt", quantity: 1, unit: "tsp"}],
+        ingredients: [{item: "Salt", quantity: 1, unit: UnitsEnum.Tsp}],
         steps: [{
             instructions: "Cook"
         }],
         mediaUrls: [{type: "image", url: "https://example.com/image.jpg"}],
     };
+    const requestWithMatchingPrincipal = {
+        user: <IPrincipal>{
+            subId: mockRecipe.createdBy
+        }
+    };
 
     beforeEach(() => {
-        mockRepo = Mock.ofType<IRecipeRepository>();
-        controller = new RecipeController(mockRepo.object);
+        recipeRepositoryMock = Mock.ofType<IRecipeRepository>();
+        recipeToJsonConverterMock = Mock.ofType<IRecipeToJsonConverter>();
+        groupRepositoryMock = Mock.ofType<IGroupRepository>();
+        userRepositoryMock = Mock.ofType<IUserRepository>();
+        controller = new RecipeController(
+            recipeRepositoryMock.object,
+            recipeToJsonConverterMock.object,
+            groupRepositoryMock.object,
+            userRepositoryMock.object
+        );
     });
 
     it("getRecipes_withNoFilter_returnsAllRecipes", async () => {
         // arrange
-        mockRepo.setup(m => m.getAll()).returns(async () => [mockRecipe]);
+        const pageIndex = 0;
+        const pageSize = 2;
+
+        recipeRepositoryMock
+            .setup(m => m.getAll(requestWithMatchingPrincipal.user.subId, pageIndex, pageSize))
+            .returns(async () => (<IPagedList<IRecipe>> {
+                pageIndex,
+                pageSize,
+                totalItems: 1,
+                totalPages: 1,
+                data: [mockRecipe]
+            }));
 
         // act
-        const result = await controller.getRecipes();
+        const result = await controller.getRecipes(requestWithMatchingPrincipal, pageIndex, pageSize);
 
         // assert
-        expect(result.length).toBe(1);
-        expectMatches(result[0], mockRecipe);
+        expect(result.data.length).toBe(1);
+        expectMatches(result.data[0], mockRecipe);
     });
 
     it("getRecipe_withValidId_returnsRecipe", async () => {
         // arrange
         const expectedId = "some_id";
-        mockRepo.setup(m => m.getById(expectedId)).returns(async () => mockRecipe);
+        recipeRepositoryMock.setup(m => m.getById(expectedId)).returns(async () => mockRecipe);
 
         // act
-        const result = await controller.getRecipe(expectedId);
+        const result = await controller.getRecipe(requestWithMatchingPrincipal, expectedId);
 
         // assert
         expectMatches(result, mockRecipe);
@@ -50,10 +88,12 @@ describe("RecipeController", () => {
 
     it("createRecipe_withValidRecipe_createsRecipe", async () => {
         // arrange
-        mockRepo.setup(m => m.create(It.isAny())).returns(async () => mockRecipe);
+        recipeRepositoryMock
+            .setup(m => m.create(mockRecipe.createdBy, It.isAny()))
+            .returns(async () => mockRecipe);
 
         // act
-        const result = await controller.createRecipe(mockRecipe);
+        const result = await controller.createRecipe(requestWithMatchingPrincipal, mockRecipe);
 
         // assert
         expectMatches(result, mockRecipe);
@@ -61,19 +101,26 @@ describe("RecipeController", () => {
 
     it("update_withValidData_updatesRecipe", async () => {
         // arrange
-        const expectedId = "some_id";
         const updatedRecipe: IRecipe = {
             ...mockRecipe,
             name: "Updated Recipe",
             description: "Updated Description",
-            ingredients: [...mockRecipe.ingredients, {item: "Pepper", quantity: 1, unit: "tsp"}],
+            ingredients: [...mockRecipe.ingredients, {item: "Pepper", quantity: 1, unit: UnitsEnum.Tsp}],
             steps: [...mockRecipe.steps, {instructions: "Serve"}],
             mediaUrls: [...mockRecipe.mediaUrls, {type: "video", url: "https://example.com/video.mp4"}]
         };
-        mockRepo.setup(m => m.update(expectedId, updatedRecipe)).returns(async () => updatedRecipe);
+        recipeRepositoryMock
+            .setup(m => m.getById(updatedRecipe.id))
+            .returns(async () => updatedRecipe);
+        recipeRepositoryMock
+            .setup(m => m.update(mockRecipe.createdBy, updatedRecipe.id, updatedRecipe))
+            .returns(async () => updatedRecipe);
 
         // act
-        const result = await controller.updateRecipe(expectedId, updatedRecipe);
+        const result = await controller.updateRecipe(
+            requestWithMatchingPrincipal,
+            updatedRecipe.id,
+            updatedRecipe);
 
         // assert
         expectMatches(result, updatedRecipe);
@@ -81,18 +128,23 @@ describe("RecipeController", () => {
 
     it("deleteRecipe_withValidId_deletesRecipe", async () => {
         // arrange
-        const expectedId = "some_id";
-        mockRepo.setup(m => m.delete(expectedId)).returns(async () => true);
+        recipeRepositoryMock
+            .setup(m => m.getById(mockRecipe.id))
+            .returns(async () => mockRecipe);
+        recipeRepositoryMock
+            .setup(m => m.delete(mockRecipe.id))
+            .returns(async () => true);
 
         // act
-        const result = await controller.deleteRecipe(expectedId);
+        const result =
+            await controller.deleteRecipe(requestWithMatchingPrincipal, mockRecipe.id);
 
         // assert
         expect(result).toBe(true);
     });
 
     afterEach(() => {
-        mockRepo.verifyAll();
+        recipeRepositoryMock.verifyAll();
     });
 
     function expectMatches(result: IRecipe | null, expected: IRecipe) {

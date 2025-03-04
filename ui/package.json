@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
-    "unit": "vitest",
+    "unit": "vitest run",
     "e2e": "playwright test",
     "build-only": "vite build --mode",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",

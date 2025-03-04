@@ -1,5 +1,5 @@
 # ui/VueApp.Dockerfile
-FROM node:16 as build-stage
+FROM node:16 AS build-stage
 
 WORKDIR /app
 

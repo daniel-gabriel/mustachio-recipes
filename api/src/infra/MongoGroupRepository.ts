@@ -42,7 +42,7 @@ export class MongoGroupRepository implements IGroupRepository {
         ];
         const results = await GroupModel.aggregate(pipeline).exec();
 
-        if (!results?.length || !results[0].members?.length) {
+        if (!results?.length || !results[0].members === undefined) {
             return undefined;
         }
         const result = results[0];
@@ -73,21 +73,20 @@ export class MongoGroupRepository implements IGroupRepository {
             {$count: "exists"}
         ];
         const results = await GroupModel.aggregate(pipeline).exec();
-        return results?.length && results[0]?.exists;
+        return !!results?.length && (results[0]?.exists > 0);
     }
 
     public async getMember(ownerId: string, groupName: string, memberSubId: string): Promise<IMember | undefined> {
-        const group = await GroupModel.findOne({
-            owner: ownerId,
-            name: groupName
-        }, {
-            members: {
-                $elemMatch: {
-                    user: memberSubId
-                }
-            }
-        });
-        const foundMember = group?.members?.[0];
+        const pipeline = [
+            {$match: {owner: ownerId, name: groupName}},
+            {$match: {"members.subId": memberSubId}},
+            {$limit: 1},
+        ];
+        const results = await GroupModel.aggregate(pipeline).exec();
+
+        const foundGroup = results?.[0];
+
+        const foundMember = foundGroup?.members?.[0];
         if (!foundMember) {
             return undefined;
         }
@@ -98,13 +97,57 @@ export class MongoGroupRepository implements IGroupRepository {
         };
     }
 
-    public async addMember(ownerId: string, groupName: string, memberSubId: string) {
+    public async inviteMember(ownerId: string, groupName: string, memberSubId: string, randomCode: string) {
+        await GroupModel.findOneAndUpdate({
+            owner: ownerId,
+            name: groupName
+        }, {
+            $setOnInsert: {owner: ownerId, name: groupName},
+            $addToSet: {
+                members: {
+                    invitedSubId: memberSubId,
+                    randomCode: randomCode
+                }
+            } // Use $addToSet to avoid adding duplicates
+        }, {
+            new: true,
+            upsert: true
+        }).exec();
+    }
+
+    public async addMember(ownerId: string, groupName: string, memberSubId: string, randomCode: string) {
+        if (!(await GroupModel.findOne({
+            owner: ownerId,
+            name: groupName,
+            members: {
+                $elemMatch: {
+                    invitedSubId: memberSubId,
+                    randomCode: randomCode
+                }
+            }
+        }))) {
+            throw new Error("You must first be invited to this user's group");
+        }
         await GroupModel.findOneAndUpdate({
             owner: ownerId,
             name: groupName
         }, {
             $setOnInsert: {owner: ownerId, name: groupName},
             $addToSet: {members: {subId: memberSubId}} // Use $addToSet to avoid adding duplicates
+        }, {
+            new: true,
+            upsert: true
+        }).exec();
+        await GroupModel.findOneAndUpdate({
+            owner: ownerId,
+            name: groupName,
+        }, {
+            $pull: {
+                members: {
+                    invitedSubId: memberSubId,
+                    randomCode: randomCode
+                }
+            }
         }, {
             new: true,
             upsert: true

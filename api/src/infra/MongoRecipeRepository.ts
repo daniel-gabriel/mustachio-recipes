@@ -144,7 +144,7 @@ export class MongoRecipeRepository implements IRecipeRepository {
         const groupMembers = await GroupModel
             .findOne({owner: userSubId, name: groupName}, {[memberSubIdPropertyName]: 1})
             .lean();
-        return groupMembers?.members.map(m => m.subId) || [];
+        return groupMembers?.members.filter(m => m.subId).map(m => m.subId as string) || [];
     }
 
     private toExternalModel(recipe: IRecipeDoc): IRecipe {
