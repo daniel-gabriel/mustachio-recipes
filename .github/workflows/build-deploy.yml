@@ -127,7 +127,7 @@ jobs:
 
       - name: Login to GitHub Container Registry
         # run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        run: echo "${{ github.TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push API Docker image
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
@@ -286,7 +286,7 @@ jobs:
           DROPLET_ADDRESS: ${{ vars.DIGITAL_OCEAN_DROPLET_IP_PROD }}
           DROPLET_USER: ${{ vars.DIGITAL_OCEAN_DROPLET_USER_PROD }}
           GHCR_USER: ${{ vars.GHCR_USER }}
-          GHCR_TOKEN: ${{ github.TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
