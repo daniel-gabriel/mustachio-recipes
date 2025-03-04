@@ -16,12 +16,6 @@ on:
       - '*'
     tags:
       - v*
-permissions:
-  id-token: write
-  contents: write
-  checks: write
-  issues: write # to be able to leave a comment
-  packages: write
 
 jobs:
   build_and_push:
@@ -126,8 +120,8 @@ jobs:
           docker build -t ghcr.io/${{ steps.tags.outputs.uiTag }} -t ghcr.io/${{ steps.tags.outputs.uiTagLatest }} .
 
       - name: Login to GitHub Container Registry
-        # run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+#        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push API Docker image
         if: ${{ steps.check-changes.outputs.api-changed == 'true' }}
@@ -286,7 +280,7 @@ jobs:
           DROPLET_ADDRESS: ${{ vars.DIGITAL_OCEAN_DROPLET_IP_PROD }}
           DROPLET_USER: ${{ vars.DIGITAL_OCEAN_DROPLET_USER_PROD }}
           GHCR_USER: ${{ vars.GHCR_USER }}
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
         run: |
           echo "$DROPLET_PRIVATE_KEY" > deploy_key
           chmod 600 deploy_key
