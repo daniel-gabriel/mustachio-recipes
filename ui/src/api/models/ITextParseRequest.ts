@@ -3,6 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
+/**
+ * Parameters of parsing the text.
+ */
 export type ITextParseRequest = {
+    /**
+     * The text to parse.
+     */
     source: string;
 };

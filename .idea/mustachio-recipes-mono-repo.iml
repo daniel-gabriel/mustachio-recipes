@@ -12,6 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/ui/dist" />
       <excludeFolder url="file://$MODULE_DIR$/ui/playwright-report" />
       <excludeFolder url="file://$MODULE_DIR$/ui/test-results" />
+      <excludeFolder url="file://$MODULE_DIR$/api/coverage" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

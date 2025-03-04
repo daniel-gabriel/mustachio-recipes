@@ -4,6 +4,8 @@
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, HttpStatusCodeLiteral, TsoaResponse, fetchMiddlewares } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { GroupController } from './../controllers/GroupController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { RecipeController } from './../controllers/RecipeController';
 import { expressAuthentication } from './../startup/TsoaAuth';
 // @ts-ignore - no great way to install types from subpackage
@@ -17,9 +19,48 @@ const upload = multer();
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "IMember": {
+        "dataType": "refObject",
+        "properties": {
+            "subId": {"dataType":"string"},
+            "invitedSubId": {"dataType":"string"},
+            "randomCode": {"dataType":"string"},
+            "createdOn": {"dataType":"datetime","required":true},
+            "lastUpdatedOn": {"dataType":"datetime","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IPagedList_IMember_": {
+        "dataType": "refObject",
+        "properties": {
+            "data": {"dataType":"array","array":{"dataType":"refObject","ref":"IMember"},"required":true},
+            "pageIndex": {"dataType":"double","required":true},
+            "pageSize": {"dataType":"double","required":true},
+            "totalItems": {"dataType":"double","required":true},
+            "totalPages": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "IGroup": {
+        "dataType": "refObject",
+        "properties": {
+            "owner": {"dataType":"string","required":true},
+            "groupName": {"dataType":"string","required":true},
+            "members": {"ref":"IPagedList_IMember_","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "LocalesEnum": {
         "dataType": "refEnum",
         "enums": ["en-US","ru-RU","unsupported"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "UnitsEnum": {
+        "dataType": "refEnum",
+        "enums": ["tsp","tbsp","fl oz","c","pt","qt","gal","ml","l","g","kg","oz","lb","pinch","dash","touch","handful","stick","can","pkg","jar","bottle","bunch","slice","piece","whole","half","quarter","drop","cube","to taste"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "IIngredient": {
@@ -27,7 +68,7 @@ const models: TsoaRoute.Models = {
         "properties": {
             "item": {"dataType":"string","required":true},
             "quantity": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true},
-            "unit": {"dataType":"string","required":true},
+            "unit": {"ref":"UnitsEnum","required":true},
         },
         "additionalProperties": false,
     },
@@ -124,6 +165,168 @@ export function RegisterRoutes(app: Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
+        app.get('/groups/:ownerId/:groupName',
+            ...(fetchMiddlewares<RequestHandler>(GroupController)),
+            ...(fetchMiddlewares<RequestHandler>(GroupController.prototype.getGroupWithPagedMembers)),
+
+            async function GroupController_getGroupWithPagedMembers(request: any, response: any, next: any) {
+            const args = {
+                    ownerId: {"in":"path","name":"ownerId","required":true,"dataType":"string"},
+                    groupName: {"in":"path","name":"groupName","required":true,"dataType":"string"},
+                    memberPageIndex: {"in":"query","name":"memberPageIndex","required":true,"dataType":"double"},
+                    memberPageSize: {"in":"query","name":"memberPageSize","required":true,"dataType":"double"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GroupController>(GroupController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getGroupWithPagedMembers.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/groups/:ownerId/:groupName/:memberSubId',
+            ...(fetchMiddlewares<RequestHandler>(GroupController)),
+            ...(fetchMiddlewares<RequestHandler>(GroupController.prototype.getMember)),
+
+            async function GroupController_getMember(request: any, response: any, next: any) {
+            const args = {
+                    ownerId: {"in":"path","name":"ownerId","required":true,"dataType":"string"},
+                    groupName: {"in":"path","name":"groupName","required":true,"dataType":"string"},
+                    memberSubId: {"in":"path","name":"memberSubId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GroupController>(GroupController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.getMember.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/groups/invites/:ownerId/:groupName/:memberSubId',
+            ...(fetchMiddlewares<RequestHandler>(GroupController)),
+            ...(fetchMiddlewares<RequestHandler>(GroupController.prototype.inviteMember)),
+
+            async function GroupController_inviteMember(request: any, response: any, next: any) {
+            const args = {
+                    ownerId: {"in":"path","name":"ownerId","required":true,"dataType":"string"},
+                    groupName: {"in":"path","name":"groupName","required":true,"dataType":"string"},
+                    memberSubId: {"in":"path","name":"memberSubId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GroupController>(GroupController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.inviteMember.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/groups/:ownerId/:groupName/:memberSubId',
+            ...(fetchMiddlewares<RequestHandler>(GroupController)),
+            ...(fetchMiddlewares<RequestHandler>(GroupController.prototype.addMember)),
+
+            async function GroupController_addMember(request: any, response: any, next: any) {
+            const args = {
+                    ownerId: {"in":"path","name":"ownerId","required":true,"dataType":"string"},
+                    groupName: {"in":"path","name":"groupName","required":true,"dataType":"string"},
+                    memberSubId: {"in":"path","name":"memberSubId","required":true,"dataType":"string"},
+                    randomCode: {"in":"query","name":"randomCode","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GroupController>(GroupController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.addMember.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.delete('/groups/:ownerId/:groupName/:memberSubId',
+            ...(fetchMiddlewares<RequestHandler>(GroupController)),
+            ...(fetchMiddlewares<RequestHandler>(GroupController.prototype.deleteMember)),
+
+            async function GroupController_deleteMember(request: any, response: any, next: any) {
+            const args = {
+                    ownerId: {"in":"path","name":"ownerId","required":true,"dataType":"string"},
+                    groupName: {"in":"path","name":"groupName","required":true,"dataType":"string"},
+                    memberSubId: {"in":"path","name":"memberSubId","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const container: IocContainer = typeof iocContainer === 'function' ? (iocContainer as IocContainerFactory)(request) : iocContainer;
+
+                const controller: any = await container.get<GroupController>(GroupController);
+                if (typeof controller['setStatus'] === 'function') {
+                controller.setStatus(undefined);
+                }
+
+
+              const promise = controller.deleteMember.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/recipes',
             authenticateMiddleware([{"Bearer":[]}]),
             ...(fetchMiddlewares<RequestHandler>(RecipeController)),

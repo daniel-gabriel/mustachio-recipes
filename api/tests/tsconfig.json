@@ -11,12 +11,8 @@
             "ES2020",
             "DOM"
         ],
-        // Redirect output files to dist directory
-        "outDir": "./dist",
         // Root directory of input files
-        "rootDir": "./src",
-        // Remove comments in the output files
-        "removeComments": true,
+        "rootDir": "..",
         // Enable all strict type-checking options
         "strict": true,
         // Raise error on expressions and declarations with an implied 'any' type
@@ -36,10 +32,6 @@
 
         /* Additional Checks */
 
-        // Report errors on unused locals
-        "noUnusedLocals": true,
-        // Report errors on unused parameters
-        "noUnusedParameters": true,
         // Report error when not all code paths in function return a value
         "noImplicitReturns": true,
         // Report errors for fallthrough cases in switch statement
@@ -68,16 +60,13 @@
     },
     "include": [
         // Include express.d.ts file
-        "express.d.ts",
+        "../express.d.ts",
         // Include all TypeScript files in src directory
-        "src/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
         // Exclude the node_modules directory
-        "node_modules",
-        // Exclude all test files
-        "**/*.unit.ts",
-        "tests",
+        "../node_modules",
         // Exclude the dist folder
         "dist"
     ]

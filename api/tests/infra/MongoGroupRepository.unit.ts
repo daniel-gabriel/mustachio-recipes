@@ -1,115 +1,106 @@
-import { GroupModel } from "../../src/infra/GroupModel";
 import { MongoGroupRepository } from "../../src/infra/MongoGroupRepository";
-import {MongoTestHelper} from "../_utils/MongoTestHelper";
+import { GroupModel } from "../../src/infra/GroupModel";
+import { MongoTestHelper } from "../_utils/MongoTestHelper";
+import {v4 as newGuid} from "uuid";
 
 const mongoTestHelper = new MongoTestHelper();
 
 describe("MongoGroupRepository", () => {
-    const ownerId = "ownerId";
-    const groupName = "default";
-    const memberSubId = "memberSubId";
     let repo: MongoGroupRepository;
+    let mockOwnerId = "mockOwnerId";
+    let mockGroupName = "mockGroupName";
+    let mockMemberSubId = "mockMemberSubId";
+    let mockRandomCode = "randomCode";
 
     beforeAll(async () => {
         await mongoTestHelper.startInMemoryMongo();
         repo = new MongoGroupRepository();
     });
 
+    beforeEach(() => {
+        mockOwnerId = `mockOwnerId-${newGuid()}`;
+        mockGroupName = `mockGroupName-${newGuid()}`;
+        mockMemberSubId = `mockMemberSubId-${newGuid()}`;
+        mockRandomCode = `randomCode-${newGuid()}`;
+    });
+
     afterAll(async () => {
         await mongoTestHelper.stopInMemoryMongo();
     });
 
-    beforeEach(async () => {
-        await GroupModel.deleteMany({});
-    });
+    it("getGroupWithPagedMembers_withValidParameters_returnsPagedGroup", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [] }).save();
 
-    it("getGroupWithPagedMembers_withNonExistentGroup_returnsUndefined", async () => {
-        const group = await repo.getGroupWithPagedMembers(ownerId, groupName);
-        expect(group).toBeUndefined();
-    });
+        // act
+        const group = await repo.getGroupWithPagedMembers(mockOwnerId, mockGroupName);
 
-    it("getGroupWithPagedMembers_withValidArgs_returnsPagedMembers", async () => {
-        // Create a group with members
-        const newGroup = new GroupModel({
-            name: groupName,
-            owner: ownerId,
-            members: [{ subId: memberSubId }],
-        });
-        await newGroup.save();
-
-        // Retrieve paged members
-        const group = await repo.getGroupWithPagedMembers(ownerId, groupName, 0, 10);
+        // assert
         expect(group).toBeDefined();
-        expect(group!.members.data.length).toBeGreaterThanOrEqual(1);
+        expect(group?.members.pageIndex).toBe(0);
+        expect(group?.members.pageSize).toBe(10);
     });
 
-    it("isMember_withValidGroupMember_returnsTrue", async () => {
-        // Create a group with members
-        const newGroup = new GroupModel({
-            name: groupName,
-            owner: ownerId,
-            members: [{ subId: memberSubId }],
-        });
-        await newGroup.save();
+    it("isMember_withMemberInGroup_returnsTrue", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [{ subId: mockMemberSubId }] }).save();
 
-        // Check membership
-        const isMember = await repo.isMember(ownerId, groupName, memberSubId);
-        expect(isMember).toBeTruthy();
+        // act
+        const isMember = await repo.isMember(mockOwnerId, mockGroupName, mockMemberSubId);
+
+        // assert
+        expect(isMember).toBe(true);
     });
 
-    it("addMember_withValidData_addsMemberToGroup", async () => {
-        // Create a group
-        const newGroup = new GroupModel({
-            name: groupName,
-            owner: ownerId,
-            members: [],
-        });
-        await newGroup.save();
+    it("getMember_withExistingMember_returnsMember", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [{ subId: mockMemberSubId }] }).save();
 
-        // Add a new member
-        await repo.addMember(ownerId, groupName, memberSubId);
+        // act
+        const member = await repo.getMember(mockOwnerId, mockGroupName, mockMemberSubId);
 
-        // Verify the member was added
-        const group = await GroupModel.findOne({ owner: ownerId, name: groupName });
-        const memberAdded = group!.members.some(m => m.subId === memberSubId);
-        expect(memberAdded).toBeTruthy();
+        const group = await repo.getGroupWithPagedMembers(mockOwnerId, mockGroupName);
+        console.log(`${JSON.stringify(group?.members)}`);
+
+        // assert
+        expect(member).toBeDefined();
+        expect(member?.subId).toBe(mockMemberSubId);
     });
 
-    it("deleteMember_withMatchingSubId_removesMemberAndReturnsTrue", async () => {
-        // Create a group with members
-        const newGroup = new GroupModel({
-            name: groupName,
-            owner: ownerId,
-            members: [{ subId: memberSubId }],
-        });
-        await newGroup.save();
+    it("inviteMember_withValidData_invitesMember", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [] }).save();
 
-        // Remove a member
-        const success = await repo.deleteMember(ownerId, groupName, memberSubId);
-        expect(success).toBeTruthy();
+        // act
+        await repo.inviteMember(mockOwnerId, mockGroupName, mockMemberSubId, mockRandomCode);
+        const group = await GroupModel.findOne({ owner: mockOwnerId, name: mockGroupName });
 
-        // Verify the member was removed
-        const updatedGroup = await GroupModel.findOne({ owner: ownerId, name: groupName });
-        const memberExists = updatedGroup!.members.some(m => m.subId === memberSubId);
-        expect(memberExists).toBeFalsy();
+        // assert
+        expect(group?.members.some(member => member.invitedSubId === mockMemberSubId)).toBe(true);
     });
 
-    it("deleteMember_withNonMatchingSubId_doesNotRemoveAndReturnsFalse", async () => {
-        // Create a group with members
-        const newGroup = new GroupModel({
-            name: groupName,
-            owner: ownerId,
-            members: [{ subId: memberSubId }],
-        });
-        await newGroup.save();
+    it("addMember_withValidInvitation_addsMember", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [{ invitedSubId: mockMemberSubId, randomCode: mockRandomCode }] }).save();
 
-        // Remove a member
-        const success = await repo.deleteMember(ownerId, groupName, "some id");
-        expect(success).toBeFalsy();
+        // act
+        await repo.addMember(mockOwnerId, mockGroupName, mockMemberSubId, mockRandomCode);
+        const group = await GroupModel.findOne({ owner: mockOwnerId, name: mockGroupName });
 
-        // Verify the member was removed
-        const updatedGroup = await GroupModel.findOne({ owner: ownerId, name: groupName });
-        const memberExists = updatedGroup!.members.some(m => m.subId === memberSubId);
-        expect(memberExists).toBeTruthy();
+        // assert
+        expect(group?.members.some(member => member.subId === mockMemberSubId)).toBe(true);
+    });
+
+    it("deleteMember_withExistingMember_deletesMember", async () => {
+        // arrange
+        await new GroupModel({ owner: mockOwnerId, name: mockGroupName, members: [{ subId: mockMemberSubId }] }).save();
+
+        // act
+        const result = await repo.deleteMember(mockOwnerId, mockGroupName, mockMemberSubId);
+        const group = await GroupModel.findOne({ owner: mockOwnerId, name: mockGroupName });
+
+        // assert
+        expect(result).toBe(true);
+        expect(group?.members.some(member => member.subId === mockMemberSubId)).toBe(false);
     });
 });

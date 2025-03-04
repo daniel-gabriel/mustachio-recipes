@@ -33,10 +33,13 @@ describe("DisplayRecipeDetails", () => {
                 stubs: {
                     "o-button": true,
                     "o-field": true,
-                    "o-switch": true
+                    "o-switch": true,
+                    "o-dropdown": true,
+                    "o-dropdown-item": true,
+                    "o-icon": true
                 }
             }
         });
-        expect(wrapper.text()).toContain("Salt 1 Pounds (lb)");
+        expect(wrapper.text()).toContain("Salt - 1 lb (Pounds)");
     });
 });

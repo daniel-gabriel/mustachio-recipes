@@ -7,6 +7,7 @@ export interface IGroupRepository {
     ): Promise<IGroup | undefined>;
     isMember(ownerId: string, groupName: string, memberSubId: string): Promise<boolean>;
     getMember(ownerId: string, groupName: string, memberSubId: string): Promise<IMember | undefined>;
-    addMember(ownerId: string, groupName: string, memberSubId: string): Promise<void>;
+    inviteMember(ownerId: string, groupName: string, memberSubId: string, randomCode: string): Promise<void>;
+    addMember(ownerId: string, groupName: string, memberSubId: string, randomCode: string): Promise<void>;
     deleteMember(ownerId: string, groupName: string, memberSubId: string): Promise<boolean>;
 }
