@@ -17,7 +17,8 @@ export class DiStartup {
     public static init(container: DependencyContainer) {
         container.register<OpenAI>("OpenAI", {
             useValue: new OpenAI({
-                apiKey: Config.OPENAI_API_KEY
+                apiKey: Config.OPENAI_API_KEY,
+                baseURL: Config.LLM_PROVIDER_URL
             })
         });
         container.register<ILoggerFactory>("ILoggerFactory", {useClass: LoggerFactory});
