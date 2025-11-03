@@ -9,6 +9,7 @@ services:
       - "3002:3002"
     depends_on:
       - mongodb
+    restart: unless-stopped
 
   ui:
     image: ghcr.io/daniel-gabriel/mustachio-recipes/ui:latest
@@ -18,6 +19,7 @@ services:
       - "80:80"
     depends_on:
       - api
+    restart: unless-stopped
 
   mongodb:
     image: "mongo:latest"
@@ -25,6 +27,7 @@ services:
       - .env.mongo
     volumes:
       - mongodata:/data/db
+    restart: unless-stopped
 
 volumes:
   mongodata:

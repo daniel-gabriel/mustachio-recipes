@@ -8,6 +8,7 @@ import {inject, injectable} from "tsyringe";
 import OpenAI from "openai";
 import {LocalesEnum} from "../infra/LocalesEnum";
 import {UnitsEnum} from "../infra/UnitsEnum";
+import Config from "../startup/config/Config";
 
 @injectable()
 export class OpenAIRecipeToJsonConverter implements IRecipeToJsonConverter {
@@ -22,8 +23,9 @@ export class OpenAIRecipeToJsonConverter implements IRecipeToJsonConverter {
     public async parseRecipe(type: "html" | "text", textOrHtml: string): Promise<IRecipe> {
 
         try {
+            this.logger.info(`Using this URL: ${Config.LLM_PROVIDER_URL} URL in OpenAI library: ${this.openAI.baseURL}`);
             const responseData = await this.openAI.chat.completions.create({
-                model: "gpt-4",
+                model: "gpt-4o",
                 max_tokens: 1000,
                 messages: [{
                     role: "user",
